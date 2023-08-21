@@ -79,10 +79,9 @@ exports.postLoginController = async (req, res, next) => {
       return
     }
 
-
     let trainerInDB, traineeInDB
     if (isTrainer) {
-      traineeInDBtrainerInDB = await Trainer.findOne({ email })
+      trainerInDB = await Trainer.findOne({ email })
       if (!trainerInDB) {
         res.status(401).json({ message: "Trainer account not found" })
         return
@@ -106,8 +105,8 @@ exports.postLoginController = async (req, res, next) => {
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "15m" }
       )
-      console.log("Trainer login successful")
-      res.status(200).json({ data: { authToken } })
+      // res.status(200).json({ data: { authToken } })
+      res.cookie("authToken", authToken).json({ message: "Trainer accoun login successfully"})
     } else if (traineeInDB) {
       const isPasswordCorrect = bcrypt.compareSync(
         password,
@@ -126,8 +125,10 @@ exports.postLoginController = async (req, res, next) => {
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "15m" }
       )
-      console.log('Trainee login successful')
-      res.status(200).json({ data: { authToken } })
+      // res.status(200).json({ data: { authToken } })
+      res
+        .cookie("authToken", authToken)
+        .json({ message: "Trainee accoun login successfully" })
     }
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
