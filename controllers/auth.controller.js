@@ -106,7 +106,13 @@ exports.postLoginController = async (req, res, next) => {
         { algorithm: "HS256", expiresIn: "15m" }
       )
       // res.status(200).json({ data: { authToken } })
-      res.cookie("authToken", authToken).json({ message: "Trainer accoun login successfully"})
+      res.cookie("authToken", authToken, {
+          httpOnly: true,
+          maxAge: 54000,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
+        .json({ message: "Trainer accoun login successfully" })
     } else if (traineeInDB) {
       const isPasswordCorrect = bcrypt.compareSync(
         password,
@@ -126,8 +132,12 @@ exports.postLoginController = async (req, res, next) => {
         { algorithm: "HS256", expiresIn: "15m" }
       )
       // res.status(200).json({ data: { authToken } })
-      res
-        .cookie("authToken", authToken)
+      res.cookie("authToken", authToken,{
+          httpOnly: true,
+          maxAge: 54000,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        })
         .json({ message: "Trainee accoun login successfully" })
     }
   } catch (error) {
