@@ -7,7 +7,7 @@ const appointmentSchema = new Schema(
       ref: "Trainee",
     },
     dateTime: {
-      type: String,
+      type: Object,
       default: {
         month: NaN, // from 1 to 12
         day: NaN, // from 1 to 31
