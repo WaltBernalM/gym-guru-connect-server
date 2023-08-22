@@ -5,7 +5,7 @@ exports.isTrainee = async (req, res, next) => {
   const traineeInDB = await Trainee.findById(traineeId)
 
   if (!traineeInDB) { 
-    res.status(404).json({ message: "Trainee credentials not found in db" })
+    res.status(403).json({ message: "Forbidden access: Credentials of Treinee account not found" })
     return
   }
   next()
