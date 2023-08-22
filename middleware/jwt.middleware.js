@@ -9,7 +9,7 @@ const getTokenFromCookies = (req) => {
 
 const isAuthenticated = jwt({
   secret: process.env.SECRET_KEY,
-  algoritms: ["HS256"],
+  algorithms: ["HS256"],
   requestProperty: "payload",
   getToken: getTokenFromCookies
 })
