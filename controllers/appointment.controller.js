@@ -84,6 +84,26 @@ const postCreateAppointment = async (req, res, next) => {
 const putAddTrainee = async (req, res, next) => {
   try {
     const { appointmentId, traineeId } = req.params
+
+    const {dayInfo} = await Appointment.findById(appointmentId)
+
+    const options = {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }
+    const currentDate = new Date().toLocaleString("en-US", options)
+    const dateInAppointment = new Date(dayInfo).toLocaleString("en-US", options)
+
+    const today = new Date(currentDate)
+    if (new Date(dateInAppointment) < today.setDate(today.getDate() + 2)) {
+      res.status(400).json({
+        message: "Cannot book prior to 48 hours",
+      })
+      return
+    }
+
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
       { traineeId, isAvailable: false },
