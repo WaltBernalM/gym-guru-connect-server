@@ -6,16 +6,10 @@ exports.appointmentAvailable = async (req, res, next) => {
   try {
     const { appointmentId, trainerId } = req.params
 
-    // verifies thath the appointment is in DB
+    // verifies that the appointment is in DB
     const appointmentInDB = await Appointment.findById(appointmentId)
     if (!appointmentInDB) {
       res.status(404).json({ message: "Not found: Appointment not found in DB" })
-      return
-    }
-
-    // Verifies that the appintment can be accessed to add a trainee (with virtual property)
-    if (!appointmentInDB.isAvailable) {
-      res.status(423).json({ message: "Locked Appointment: It has a booking already" })
       return
     }
 
@@ -25,6 +19,18 @@ exports.appointmentAvailable = async (req, res, next) => {
       res
         .status(404)
         .json({ message: "Not found: Trainer target not found in DB" })
+      return
+    }
+
+    // Verifies that the appintment can be accessed to add a trainee
+    const traineeInDB = await Trainee.findById(req.params.traineeId)
+
+    if (traineeInDB &&  !appointmentInDB.isAvailable && JSON.stringify(traineeInDB._id) !== JSON.stringify(appointmentInDB.traineeId)) {
+      res.status(423)
+        .json({
+          message:
+            "Locked Appointment: It has a booking already for a different Trainee",
+        })
       return
     }
 

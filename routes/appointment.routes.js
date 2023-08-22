@@ -1,7 +1,10 @@
 const router = require("express").Router()
 
 const {
-  postCreateAppointment, putAddTrainee, deleteAppointment,
+  postCreateAppointment,
+  putAddTrainee,
+  patchRemoveTrainee,
+  deleteAppointment,
 } = require("../controllers/appointment.controller")
 
 // Verifies that is a Trainee is in DB
@@ -12,6 +15,8 @@ const { isAllowedTrainer } = require("../middleware/isAllowedTrainer.middleware"
 
 // Verifies that Trainee payload data and params data match, and that Trainee is in Db
 const { isAllowedTrainee } = require("../middleware/isAllowedTrainee.middleware")
+
+// Verifies Appointment existance in DB,  if Appointment is avaible to edit, if trainer is in DB, if appointment is inside trainers schedule and if trainee is inside trainer list of trainees.
 const { appointmentAvailable } = require("../middleware/appointmentAvailable.middleware")
 
 
@@ -28,14 +33,19 @@ router.put(
 )
 
 // Remove appointment from Trainer list by trainee ( only before 48 hours)
+router.patch(
+  "/:appointmentId/trainer/:trainerId/trainee/:traineeId",
+  isAllowedTrainee,
+  appointmentAvailable,
+  patchRemoveTrainee
+)
+
+// Delete Appointment from Trainer's appointment list (only if not booked already and before 24h)
 router.delete(
   "/:appointmentId/trainer/:trainerId/",
   isAllowedTrainer,
   appointmentAvailable,
   deleteAppointment
 )
-
-// Delete Appointment from Trainer's appointment list (only if not booked already and before 24h)
-router.delete("/:appointmentId/trainer/:trainerId", isAllowedTrainer)
 
 module.exports = router

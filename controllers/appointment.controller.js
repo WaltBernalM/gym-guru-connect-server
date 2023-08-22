@@ -85,7 +85,20 @@ const putAddTrainee = async (req, res, next) => {
   try {
     const { appointmentId, traineeId } = req.params
 
-    const {dayInfo} = await Appointment.findById(appointmentId)
+    const appointmentInDB = await Appointment.findById(appointmentId)
+    const traineeInDB = await Trainee.findById(traineeId)
+    
+    if (!appointmentInDB.isAvailable && JSON.stringify(traineeInDB._id)  !== JSON.stringify(appointmentInDB.traineeId)) {
+      res.status(423).json({ message: "Locked Appointment: It has a booking already for a different Trainee" })
+      return
+    }
+
+    if (!appointmentInDB.isAvailable && JSON.stringify(traineeInDB._id) === JSON.stringify(appointmentInDB.traineeId)) { 
+      res.status(423).json({ message: "Locked Appointment: It has a booking already for this Trainee" })
+      return
+    }
+    
+    const { dayInfo } = appointmentInDB
 
     const options = {
       timeZone: "America/Los_Angeles",
@@ -110,11 +123,39 @@ const putAddTrainee = async (req, res, next) => {
       { new: true }
     )
     
-    res.status(200).json({ message: "Success", updatedAppointment })
+    res.status(200).json({ message: "A Trainee has been booked", updatedAppointment })
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
 }
+
+const patchRemoveTrainee = async (req, res, next) => { 
+  try {
+    const traineeInDB = await Trainee.findById(req.params.traineeId)
+    const { _id: traineeId } = traineeInDB
+    const appointmentInDB = await Appointment.findById(req.params.appointmentId)
+
+    if (JSON.stringify(appointmentInDB.traineeId) !== JSON.stringify(traineeId)) {
+      res.status(400).json({
+        message:"Target Appointment does not contain the TraineeId to be removed.",
+      })
+      return
+    }
+
+    const { traineeId: traineeIdParams} = req.params
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      req.params.appointmentId,
+      { $unset: { traineeId: traineeIdParams, isAvailable: true } },
+      { new: true }
+    )
+
+    // console.log(updatedAppointment)
+    res.status(200).json({message: "removed traineeId", updatedAppointment})
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" })
+  }
+}
+
 
 const deleteAppointment = async (req, res, next) => {
   try {
@@ -156,5 +197,6 @@ const deleteAppointment = async (req, res, next) => {
 module.exports = {
   postCreateAppointment,
   putAddTrainee,
+  patchRemoveTrainee,
   deleteAppointment,
 }
