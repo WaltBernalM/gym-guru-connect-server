@@ -3,6 +3,7 @@ const Trainee = require("../models/Trainee.model")
 const getTrainee = async (req, res, next) => {
   try {
     const { traineeId } = req.params
+
     const traineeInDB = await Trainee.findById(traineeId).select("-password")
     res.status(200).json(traineeInDB)
   } catch (error) {

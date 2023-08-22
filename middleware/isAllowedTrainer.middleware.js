@@ -1,6 +1,6 @@
 const Trainer = require("../models/Trainer.model")
 
-exports.isTrainer = async (req, res, next) => {
+exports.isAllowedTrainer = async (req, res, next) => {
   const { _id: trainerIdPayload } = req.payload
   const { trainerId: trainerIdParams } = req.params
 

@@ -1,6 +1,4 @@
 const Trainer = require("../models/Trainer.model")
-const Trainee = require("../models/Trainee.model")
-const Appointment = require("../models/Appointment.model")
 
 const getAllTrainers = async (req, res, next) => {
   try {
@@ -60,93 +58,34 @@ const putAddTrainee = async (req, res, next) => {
     const { trainerId } = req.params
     const { _id: traineeId } = req.payload
 
-    const traineeInTrainer = await Trainer.findOne({trainees: traineeId})
-    
-    if (!traineeInTrainer) {
-      const updatedTrainer = await Trainer.findByIdAndUpdate(
-        trainerId,
-        { $push: { trainees: traineeId } },
-        { new: true }
+    const currentTrainer = await Trainer.findOne({ trainees: traineeId })
+
+    if (currentTrainer) {
+      await Trainer.findByIdAndUpdate(
+        currentTrainer._id,
+        { $pull: { trainees: traineeId } },
+        { new: true}
       )
-    } else if (traineeInTrainer) {
-      res.status(409).json({ message: "Trainee already exists in Trainer's trainees list" })
-      return
     }
-    
-    res.status(200).json({ message: "Trainee added to Trainer's trainee list" })
-
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" })
-  }
-}
-
-const postCreateAppointment = async (req, res, next) => {
-  try {
-    const { trainerId } = req.params
-    const { dayInfo, hour } = req.body
-
-    if (!dayInfo || !hour) {
-      res.status(400).json({ message: "dayInfo and hour are required fields" })
-      return
-    }
-
-    if (isNaN(Date.parse(dayInfo))) {
-      res.status(400).json({ message: "dayInfo must be a valid Date type (YYYY/MM/DD)" })
-      return
-    }
-
-    const options = {
-      timeZone: "America/Los_Angeles",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }
-    const currentDate = new Date().toLocaleString("en-US", options)
-    const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
-
-    const today = new Date(currentDate)
-    if (new Date(dateInput) < today.setDate(today.getDate() + 1)) {
-      res.status(400).json({ message: "dayInfo cannot be in the past or in within the next 24h" })
-      return
-    }
-
-    if (hour < 7 || hour > 22 || hour % 1 !== 0) {
-      res.status(400).json({ message: "Hour must be an integer between 7 and 22" })
-      return
-    }
-
-    const trainer = await Trainer.findById(trainerId).populate('schedule')
-    const { schedule: trainerSchedule } = trainer
-    let slotTaken = false
-    trainerSchedule.forEach(appointment => {
-      if (appointment.hour === hour && appointment.dayInfo === dateInput) {
-        slotTaken = true
-        return
-      }
-    })
-    if (slotTaken) {
-      res.status(409).json({ message: "Appointment slot is already in schedule" })
-      return
-    }
-
-    const createdAppointment = await Appointment.create({dayInfo: dateInput, hour})
-    const updatedTrainer = await Trainer.findByIdAndUpdate(
+    const newTrainer = await Trainer.findByIdAndUpdate(
       trainerId,
-      { $push: { schedule: createdAppointment._id } },
+      { $push: { trainees: traineeId } },
       { new: true }
-    ).populate('schedule').select('-password')
-
-    res.status(201).json({ message: "Appointment added to trainer", updatedTrainer })
+    )
+    
+    if (currentTrainer) {
+      res.status(200).json({ message: `Trainee removed from previous Trainer and assigned to the new Trainer`, previousTrainer: currentTrainer._id, newTrainer: newTrainer._id })
+    } else {
+      res.status(200).json({ message: `Trainee added to a Trainer`, newTrainer: newTrainer._id})
+    }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
 }
-
 
 module.exports = {
   getAllTrainers,
   getTrainer,
   putUpdateTrainer,
   putAddTrainee,
-  postCreateAppointment,
 }

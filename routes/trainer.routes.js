@@ -1,26 +1,34 @@
+const router = require("express").Router()
 const {
   getAllTrainers,
   getTrainer,
   putUpdateTrainer,
   putAddTrainee,
-  postCreateAppointment,
 } = require("../controllers/trainer.controller")
+const {
+  isAllowedTrainee,
+} = require("../middleware/isAllowedTrainee.middleware")
+
 const { isTrainee } = require("../middleware/isTrainee.middleware")
-const { isTraineeOrAllowedTrainer } = require("../middleware/isTraineeOrAllowedTrainer")
-const { isTrainer } = require("../middleware/isTrainer.middleware")
 
-const router = require("express").Router()
+const {
+  isTraineeOrAllowedTrainer,
+} = require("../middleware/isTraineeOrAllowedTrainer")
 
-router.get('/', isTrainee, getAllTrainers)
+const {
+  isAllowedTrainer,
+} = require("../middleware/isAllowedTrainer.middleware")
 
-router.get('/:trainerId', isTraineeOrAllowedTrainer, getTrainer)
+// only trainees can see trainers
+router.get("/", isTrainee, getAllTrainers)
 
-router.put('/:trainerId', isTrainer, putUpdateTrainer)
+// only trainee can see trainer, and only allowed trainer (self) can see own details
+router.get("/:trainerId", isTraineeOrAllowedTrainer, getTrainer)
 
-router.post("/:trainerId/appointment", isTrainer, postCreateAppointment)
+// only allows trainer (self) can update own details
+router.put("/:trainerId", isAllowedTrainer, putUpdateTrainer)
 
-
-router.put('/:trainerId/trainee', isTrainee, putAddTrainee)
-
+// allows trainee to add him into a trainer's trainees list
+router.put("/:trainerId/trainee/:traineeId", isAllowedTrainee, putAddTrainee)
 
 module.exports = router

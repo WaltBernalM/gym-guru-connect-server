@@ -5,6 +5,7 @@ exports.isAllowedTrainee = async (req, res, next) => {
     const { _id: idPayload } = req.payload
     const { traineeId } = req.params
 
+    // verify if payload id is same as params id
     if (idPayload !== traineeId) {
       res
         .status(401)
@@ -15,6 +16,7 @@ exports.isAllowedTrainee = async (req, res, next) => {
       return
     }
     
+    // verifies if trainee exists in db
     const traineeInDB = await Trainee.findById(traineeId)
     if (!traineeInDB) {
       res.status(404).json({ message: "Trainee account not found in DB" })
