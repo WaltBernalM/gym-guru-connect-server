@@ -116,8 +116,46 @@ const putAddTrainee = async (req, res, next) => {
   }
 }
 
+const deleteAppointment = async (req, res, next) => {
+  try {
+    const { appointmentId, trainerId } = req.params
+    
+    const { dayInfo } = await Appointment.findById(appointmentId)
+    const options = {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }
+    const currentDate = new Date().toLocaleString("en-US", options)
+    const dateInAppointment = new Date(dayInfo).toLocaleString("en-US", options)
+    const today = new Date(currentDate)
+    if (new Date(dateInAppointment) < today.setDate(today.getDate() + 1)) {
+      res.status(400).json({
+        message: "Cannot delete prior to 24 hours",
+      })
+      return
+    }
+    
+    const deletedAppointment = await Appointment.findByIdAndDelete(
+      appointmentId
+    )
+    const updatedTrainer = await Trainer.findByIdAndRemove(
+      trainerId,
+      { $pull: { schedule: appointmentId } },
+      { new: true }
+    )
+
+    res.status(200).json({message: "Appointment deleted", deletedAppointment, updatedTrainer})
+  } catch (error) {
+    
+  }
+
+}
+
 
 module.exports = {
   postCreateAppointment,
   putAddTrainee,
+  deleteAppointment,
 }

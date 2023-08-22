@@ -1,7 +1,7 @@
 const router = require("express").Router()
 
 const {
-  postCreateAppointment, putAddTrainee,
+  postCreateAppointment, putAddTrainee, deleteAppointment,
 } = require("../controllers/appointment.controller")
 
 // Verifies that is a Trainee is in DB
@@ -29,8 +29,10 @@ router.put(
 
 // Remove appointment from Trainer list by trainee ( only before 48 hours)
 router.delete(
-  "/:appointmentId/trainer/trainer:id/trainee/:traineeId",
-  isTrainee
+  "/:appointmentId/trainer/:trainerId/",
+  isAllowedTrainer,
+  appointmentAvailable,
+  deleteAppointment
 )
 
 // Delete Appointment from Trainer's appointment list (only if not booked already and before 24h)
