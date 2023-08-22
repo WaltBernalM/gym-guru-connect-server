@@ -81,7 +81,23 @@ const postCreateAppointment = async (req, res, next) => {
   }
 }
 
+const putAddTrainee = async (req, res, next) => {
+  try {
+    const { appointmentId, traineeId } = req.params
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { traineeId, isAvailable: false },
+      { new: true }
+    )
+    
+    res.status(200).json({ message: "Success", updatedAppointment })
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" })
+  }
+}
+
 
 module.exports = {
-  postCreateAppointment
+  postCreateAppointment,
+  putAddTrainee,
 }

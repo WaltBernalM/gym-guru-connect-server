@@ -13,13 +13,15 @@ const appointmentSchema = new Schema(
       ref: "Trainee",
       default: null
     },
+    isAvailable: {
+      type: Boolean,
+      default: true
+    }
   },
   {
     timestamps: true,
   }
 )
-
-appointmentSchema.virtual('isAvailable').get(() => !this.traineeId)
 
 const Appointment = model("Appointment", appointmentSchema)
 module.exports = Appointment
