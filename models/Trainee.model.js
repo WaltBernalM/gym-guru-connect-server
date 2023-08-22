@@ -17,7 +17,7 @@ const traineeSchema = new Schema(
       type: Object,
       required: [true, "Name and Last name are required."],
       default: {
-        name: "",
+        firstName: "",
         lastName: "",
       },
     },
