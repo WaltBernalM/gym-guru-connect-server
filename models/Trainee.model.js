@@ -28,7 +28,7 @@ const traineeSchema = new Schema(
     personalInfo: {
       type: Object,
       default: {
-        age: "",
+        age: 0,
         height: NaN,
         weight: NaN,
         fatPercent: NaN,
