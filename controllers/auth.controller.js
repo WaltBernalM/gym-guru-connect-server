@@ -112,7 +112,7 @@ exports.postLoginController = async (req, res, next) => {
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
-        .json({ message: "Trainer accoun login successfully" })
+        .json({ message: "Trainer account login successfully" })
     } else if (traineeInDB) {
       const isPasswordCorrect = bcrypt.compareSync(
         password,
@@ -138,7 +138,7 @@ exports.postLoginController = async (req, res, next) => {
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
-        .json({ message: "Trainee accoun login successfully" })
+        .json({ message: "Trainee account login successfully" })
     }
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
