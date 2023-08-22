@@ -1,4 +1,4 @@
-const { getAllTrainers, getTrainer, putUpdateTrainer } = require("../controllers/trainers.controller")
+const { getAllTrainers, getTrainer, putUpdateTrainer } = require("../controllers/trainer.controller")
 const { isTrainee } = require("../middleware/isTrainee.middleware")
 const { isTraineeOrAllowedTrainer } = require("../middleware/isTraineeOrAllowedTrainer")
 const { isTrainer } = require("../middleware/isTrainer.middleware")
