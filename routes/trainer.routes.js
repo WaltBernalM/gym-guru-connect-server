@@ -3,6 +3,7 @@ const {
   getTrainer,
   putUpdateTrainer,
   putAddTrainee,
+  postCreateAppointment,
 } = require("../controllers/trainer.controller")
 const { isTrainee } = require("../middleware/isTrainee.middleware")
 const { isTraineeOrAllowedTrainer } = require("../middleware/isTraineeOrAllowedTrainer")
@@ -16,6 +17,10 @@ router.get('/:trainerId', isTraineeOrAllowedTrainer, getTrainer)
 
 router.put('/:trainerId', isTrainer, putUpdateTrainer)
 
+router.post("/:trainerId/appointment", isTrainer, postCreateAppointment)
+
+
 router.put('/:trainerId/trainee', isTrainee, putAddTrainee)
+
 
 module.exports = router
