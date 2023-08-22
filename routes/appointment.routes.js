@@ -25,7 +25,7 @@ const { appointmentAvailable } = require("../middleware/appointmentAvailable.mid
 router.post("/trainer/:trainerId", isAllowedTrainer, postCreateAppointment)
 
 // Get alla Appointments from Trainer
-router.get('/trainer/:trainerId', isAllowedTrainee, getAllAppointmentsByTrainer)
+router.get('/trainer/:trainerId', isTrainee, getAllAppointmentsByTrainer)
 
 // Updated Appointment from trainer's list to add a trainee (only before 48 hours)
 router.put(

@@ -81,8 +81,23 @@ const postCreateAppointment = async (req, res, next) => {
   }
 }
 
-const getAllAppointmentsByTrainer = async (req, res, next) => { 
+const getAllAppointmentsByTrainer = async (req, res, next) => {
+  try {
+    const { trainerId } = req.params
+    const { _id: traineeId } = req.payload
 
+    const trainerInDB = await Trainer.findById(trainerId).populate('schedule')
+    const trainerWithTrainee = await Trainer.findOne({trainees: traineeId})
+
+    if (JSON.stringify(trainerWithTrainee._id) !== JSON.stringify(trainerInDB._id)) { 
+      res.status(404).json({ message: "Trainee not found in Trainer's list" })
+      return
+    }
+
+    res.status(200).json({ schedule: trainerInDB.schedule })
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" })
+  }
 }
 
 const putAddTrainee = async (req, res, next) => {
