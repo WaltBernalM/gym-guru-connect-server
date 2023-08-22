@@ -81,6 +81,10 @@ const postCreateAppointment = async (req, res, next) => {
   }
 }
 
+const getAllAppointmentsByTrainer = async (req, res, next) => { 
+
+}
+
 const putAddTrainee = async (req, res, next) => {
   try {
     const { appointmentId, traineeId } = req.params
@@ -142,6 +146,28 @@ const patchRemoveTrainee = async (req, res, next) => {
       return
     }
 
+    const { dayInfo } = appointmentInDB
+
+    const options = {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }
+    const currentDate = new Date().toLocaleString("en-US", options)
+    const dateInAppointment = new Date(dayInfo).toLocaleString(
+      "en-US",
+      options
+    )
+
+    const today = new Date(currentDate)
+    if (new Date(dateInAppointment) < today.setDate(today.getDate() + 2)) {
+      res.status(400).json({
+        message: "Cannot remove eppointment prior to 48 hours",
+      })
+      return
+    }
+
     const { traineeId: traineeIdParams} = req.params
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       req.params.appointmentId,
@@ -150,7 +176,7 @@ const patchRemoveTrainee = async (req, res, next) => {
     )
 
     // console.log(updatedAppointment)
-    res.status(200).json({message: "removed traineeId", updatedAppointment})
+    res.status(200).json({message: "Removed traineeId", updatedAppointment})
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
@@ -196,6 +222,7 @@ const deleteAppointment = async (req, res, next) => {
 
 module.exports = {
   postCreateAppointment,
+  getAllAppointmentsByTrainer,
   putAddTrainee,
   patchRemoveTrainee,
   deleteAppointment,
