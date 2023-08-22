@@ -5,9 +5,15 @@ const Trainer = require("../models/Trainer.model")
 exports.appointmentAvailable = async (req, res, next) => {
   try {
     const { appointmentId, trainerId } = req.params
-    
-    // Verifies that the appintment can be accessed to add a trainee (with virtual property)
+
+    // verifies thath the appointment is in DB
     const appointmentInDB = await Appointment.findById(appointmentId)
+    if (!appointmentInDB) {
+      res.status(404).json({ message: "Not found: Appointment not found in DB" })
+      return
+    }
+
+    // Verifies that the appintment can be accessed to add a trainee (with virtual property)
     if (!appointmentInDB.isAvailable) {
       res.status(423).json({ message: "Locked Appointment: It has a booking already" })
       return
@@ -15,8 +21,11 @@ exports.appointmentAvailable = async (req, res, next) => {
 
     // Verifies that there's a trainer in db
     const trainerInDB = await Trainer.findById(trainerId)
-    if (!trainerInDB) { 
-      res.status(404).json({ message: "Not found: Trainer target not found in DB" })
+    if (!trainerInDB) {
+      res
+        .status(404)
+        .json({ message: "Not found: Trainer target not found in DB" })
+      return
     }
 
     // Verifies that the appointment is inside the target Trainer
@@ -28,7 +37,9 @@ exports.appointmentAvailable = async (req, res, next) => {
       }
     })
     if (!appointmentInTrainerSchedule) {
-      res.status(404).json({ message: "Not found: Appointment not found in target Trainer" })
+      res
+        .status(404)
+        .json({ message: "Not found: Appointment not found in target Trainer" })
       return
     }
 
@@ -36,13 +47,17 @@ exports.appointmentAvailable = async (req, res, next) => {
     let traineeInList = true
     if (req.params.traineeId) {
       const { traineeId } = req.params
-      const traineeInTraineeList = await Trainer.findOne({ trainees: traineeId})
+      const traineeInTraineeList = await Trainer.findOne({
+        trainees: traineeId,
+      })
       if (!traineeInTraineeList) {
         traineeInList = false
       }
     }
     if (!traineeInList) {
-      res.status(404).json({ message: "Not found: Trainee not found in target Trainer" })
+      res
+        .status(404)
+        .json({ message: "Not found: Trainee not found in target Trainer" })
       return
     }
 

@@ -140,17 +140,16 @@ const deleteAppointment = async (req, res, next) => {
     const deletedAppointment = await Appointment.findByIdAndDelete(
       appointmentId
     )
-    const updatedTrainer = await Trainer.findByIdAndRemove(
+    const updatedTrainer = await Trainer.findByIdAndUpdate(
       trainerId,
       { $pull: { schedule: appointmentId } },
       { new: true }
-    )
+    ).select('-password')
 
     res.status(200).json({message: "Appointment deleted", deletedAppointment, updatedTrainer})
   } catch (error) {
-    
+    res.status(500).json({ message: "Internal server error" })
   }
-
 }
 
 

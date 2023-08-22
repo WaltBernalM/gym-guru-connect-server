@@ -5,7 +5,6 @@ exports.isAllowedTrainer = async (req, res, next) => {
   const { trainerId: trainerIdParams } = req.params
 
   // check if ids from payload and params match
-  console.log(trainerIdPayload, trainerIdParams)
   if (trainerIdPayload !== trainerIdParams) {
     res.status(404)
       .json({ messsage: "Trainer credentials not valid"})
