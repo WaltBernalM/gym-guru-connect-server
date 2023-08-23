@@ -6,7 +6,15 @@ const getTrainee = async (req, res, next) => {
 
     const traineeInDB = await Trainee.findById(traineeId)
       .select("-password")
-      .populate('exercisePlan')
+      .populate({
+        path: 'exercisePlan',
+        populate: {
+          path: 'exerciseList',
+          populate: {
+            path: 'exerciseData'
+          }
+        }
+      })
     
     res.status(200).json(traineeInDB)
   } catch (error) {
