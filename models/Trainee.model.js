@@ -28,7 +28,7 @@ const traineeSchema = new Schema(
     personalInfo: {
       type: Object,
       default: {
-        age: "",
+        age: 0,
         height: NaN,
         weight: NaN,
         fatPercent: NaN,
@@ -36,35 +36,10 @@ const traineeSchema = new Schema(
         comments: "",
       },
     },
-    exercisePlan: {
-      type: Object,
-      default: {
-        day1: {
-          title: "",
-          exercises: [],
-        },
-        day2: {
-          title: "",
-          exercises: [],
-        },
-        day3: {
-          title: "",
-          exercises: [],
-        },
-        day4: {
-          title: "",
-          exercises: [],
-        },
-        day5: {
-          title: "",
-          exercises: [],
-        },
-        day6: {
-          title: "",
-          exercises: [],
-        },
-      },
-    },
+    exercisePlan: [{
+      type: Schema.Types.ObjectId,
+      ref: "ExerciseRoutine"
+    }],
     mealPlan: {
       type: Object,
       default: {
