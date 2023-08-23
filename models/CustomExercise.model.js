@@ -11,7 +11,7 @@ const customExercise = new Schema(
       required: [true, "reps is a required property"],
       default: 12,
     },
-    exerciseId:{
+    exerciseData:{
       type: Schema.Types.ObjectId,
       ref: "Exercise",
     },

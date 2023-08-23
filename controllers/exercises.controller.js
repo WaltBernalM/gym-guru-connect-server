@@ -1,5 +1,8 @@
 const CustomExercise = require('../models/CustomExercise.model')
 const Exercise = require('../models/Exercise.model')
+const ExerciseRoutine = require('../models/ExerciseRoutine.model')
+const Trainee = require('../models/Trainee.model')
+const mongoose = require('mongoose')
 const { populateExerciseDB } = require('../utils/populateExerciseDB')
 
 const getAllExercises = async (req, res, next) => { 
@@ -50,30 +53,233 @@ const getAllExercises = async (req, res, next) => {
   }
 }
 
-const postCustomExerciseInRoutine = async (req, res, next) => {
-  const { reps, intensity, day, routineId } = req.body
-  const { exerciseId, traineeId } = req.params
-  if (!reps || !intensity || !day) { 
-    res.status(400).json({ message: "reps, intensity and day are required" })
-    return
-  }
-  if ((reps < 1 || reps > 300 && reps % 1 !== 0) ) {
-    res.status(400).json({ message: "reps must be a integer number between 1 and 300" })
-    return
-  }
-  if (intensity < 0.3 || intensity > 1) {
-    res.status(400).json({ message: "intensity must be between 0.3 and 1" })
-    return
-  }
-  if ((day < 1 || day > 6) && day % 1 !== 0) {
-    res.status(400).json({ message: "day must be a integer number between 1 and 6" })
-    return
-  }
+const postCustomExerciseToTraineePlan = async (req, res, next) => {
+  try {
+    const { reps, intensity, exerciseRoutineId } = req.body
+    const { exerciseId, traineeId } = req.params
+    if (!reps || !intensity || !exerciseRoutineId) {
+      res
+        .status(400)
+        .json({ message: "reps, intensity and day are required" })
+      return
+    }
+    if (reps < 1 || (reps > 300 && reps % 1 !== 0)) {
+      res
+        .status(400)
+        .json({ message: "reps must be a integer number between 1 and 300" })
+      return
+    }
+    if (intensity < 0.3 || intensity > 1) {
+      res.status(400).json({ message: "intensity must be between 0.3 and 1" })
+      return
+    }
 
-  const newCustomExercise = await CustomExercise.create({ reps, intensity, exerciseId })
+    // verifies if the base exercise is in database
+    const exerciseInDB = await Exercise.findById(exerciseId)
+    if (!exerciseInDB) {
+      res.status(404).json({ message: "exerciseId not found in DB" })
+      return
+    }
+
+    // Verifies if the routine to update is in database
+    const exerciseRoutineInDB = await ExerciseRoutine.findById(exerciseRoutineId)
+    if (!exerciseRoutineInDB) {
+      res.status(404).json({ message: "exerciseRoutineId not found in DB" })
+      return
+    }
+    
+    // Verifies if routine to update is in trainee
+    const routineInTrainee = await Trainee.findOne({exercisePlan: exerciseRoutineInDB._id})
+    if (!routineInTrainee) {
+      res
+        .status(404)
+        .json({ message: "exerciseRoutineId not found in Trainee data" })
+      return
+    }
+
+    // Creates a new custom exercise
+    const newCustomExercise = await (await CustomExercise.create({
+      reps,
+      intensity,
+      exerciseData: exerciseId
+    })).populate('exerciseData')
+
+    // adds the new custom exercise to the routine of the trainee
+    const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
+      exerciseRoutineId,
+      { $push: { exerciseList: newCustomExercise._id } },
+      { new: true }
+    )
+
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .populate({
+        path: "exercisePlan",
+        populate: {
+          path: "exerciseList",
+          populate: {
+            path: "exerciseData",
+          },
+        },
+      })
+
+    res.status(201).json({ /*newCustomExercise, updatedExerciseRoutine,*/ updatedTrainee })
+    
+  } catch (error) {
+    res.status(500).json({ error })
+  }
+}
+
+const putUpdateCustomExercise = async (req, res) => { 
+  try {
+    const { customExerciseId, traineeId } = req.params
+    const { intensity: intensityBody, reps: repsBody, exerciseId: exerciseIdBody } = req.body
+
+    if (Object.keys(req.body).length === 0) {
+      res.status(400).json({ message: 'There must be at least one parameter to update: intensity, reps or base exerciseId(exerciseData)' })
+      return
+    }
+
+    const customExerciseInDB = await CustomExercise.findById(customExerciseId)
+    if (!customExerciseInDB) {
+      res.status(404).json({ message: "Custom Exercise not found in DB" })
+      return
+    }
+
+    const data = {
+      intensity: intensityBody ? intensityBody : customExerciseInDB.intensity,
+      reps: repsBody ? repsBody : customExerciseInDB.reps,
+      exerciseData: exerciseIdBody
+        ? exerciseIdBody
+        : customExerciseInDB.exerciseData,
+    }
+
+    if (data.reps < 1 || data.reps > 300 || data.reps % 1 !== 0) {
+      res.status(400).json({
+        message: "reps must be a integer number between 1 and 300",
+      })
+      return
+    }
+    if (data.intensity < 0.3 || data.intensity > 1) {
+      res.status(400).json({ message: "intensity must be between 0.3 and 1" })
+      return
+    }
+
+    const validExercise = await Exercise.findById(data.exerciseData)
+    if(!validExercise) {
+      res.status(404).json({ message: 'Base exercise not found in DB' })
+      return
+    }
+
+    const customExerciseInRoutine = await ExerciseRoutine.find({ exerciseList: customExerciseId })
+    if (!customExerciseInRoutine) { 
+      res.status(404).json({ message: 'Custom Exercise not found in any Exercise Routine in DB' })
+      return
+    }
+
+    const routineInTrainee = await Trainee.find({ _id: traineeId, exercisePlan: customExerciseInRoutine._id })
+    if (!routineInTrainee) { 
+      res.status(404).json({ message: 'Custom Exercise not found in any Exercise Routine of Trainee' })
+      return
+    }
+
+    const udpatedCustomExercise = await CustomExercise.findByIdAndUpdate(
+      customExerciseId,
+      { ...data },
+      {new: true}
+    )
+
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .populate({
+        path: "exercisePlan",
+        populate: {
+          path: "exerciseList",
+          populate: {
+            path: "exerciseData",
+          },
+        },
+      })
+
+    res.status(200).json({ /*udpatedCustomExercise, */ updatedTrainee })
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).json({ error })
+    } else {
+      res.status(500).json({ message: "Internal Server Error" })
+    }
+  }
+}
+
+const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => { 
+  try {
+    const { exerciseRoutineId } = req.body
+    const { customExerciseId, traineeId } = req.params
+
+    if (!exerciseRoutineId) {
+      res.status(400).json({ message: "exerciseRoutineId is required" })
+      return
+    }
+
+    const customExerciseInDB = await CustomExercise.findById(customExerciseId)
+    if (!customExerciseInDB) {
+      res.status(404).json({ message: "Custom Exercise not found in DB" })
+      return
+    }
+
+    const customExerciseInRoutine = await ExerciseRoutine.find({
+      _id: exerciseRoutineId,
+      exerciseList: customExerciseId,
+    })
+    if (!customExerciseInRoutine) {
+      res
+        .status(404)
+        .json({ message: "Custom Exercise not found in Exercise Routine" })
+      return
+    }
+
+    const deletedCustomExercise = await CustomExercise.findByIdAndDelete(customExerciseId)
+    const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
+      exerciseRoutineId,
+      { $pull: { exerciseList: deletedCustomExercise._id } },
+      {new: true }
+    )
+    const udpatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .populate({
+        path: "exercisePlan",
+        populate: {
+          path: "exerciseList",
+          populate: {
+            path: "exerciseData",
+          },
+        },
+      })
+
+    res.status(200).json({udpatedTrainee})
+
+    const customExerciseInTraineeData = await Trainee.find({
+      _id: traineeId,
+      exercisePlan: customExerciseInRoutine._id,
+    })
+    if (!customExerciseInTraineeData) {
+      res
+        .status(404)
+        .json({ message: "Custom Exercise not found in Trainee data" })
+      return
+    }
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).json({ error })
+    } else {
+      res.status(500).json({ message: "Internal Server Error" })
+    }
+  }
 }
 
 module.exports = {
   getAllExercises,
-  postCustomExerciseInRoutine,
+  postCustomExerciseToTraineePlan,
+  putUpdateCustomExercise,
+  deleteCustomExerciseAndRemoveInTraineePlan,
 }
