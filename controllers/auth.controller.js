@@ -110,14 +110,19 @@ exports.postLoginController = async (req, res, next) => {
         return
       }
       const authToken = jwt.sign(
-        { _id: trainerInDB._id, email: trainerInDB.email, name: trainerInDB.name }, // payload
+        {
+          _id: trainerInDB._id,
+          email: trainerInDB.email,
+          name: trainerInDB.name,
+          isTrainer: trainerInDB.isTrainer
+        }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "15m" }
       )
       // res.status(200).json({ data: { authToken } })
       res.cookie("authToken", authToken, {
           httpOnly: true,
-          maxAge: 54000,
+          maxAge: 900000,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
@@ -136,16 +141,17 @@ exports.postLoginController = async (req, res, next) => {
           _id: traineeInDB._id,
           email: traineeInDB.email,
           name: traineeInDB.name,
+          isTrainer: traineeInDB.isTrainer
         }, // payload
         process.env.SECRET_KEY, // secret key
-        { algorithm: "HS256", expiresIn: "15m" }
+        { algorithm: "HS256", expiresIn: "1h" }
       )
       // res.status(200).json({ data: { authToken } })
-      res.cookie("authToken", authToken,{
-          httpOnly: true,
-          maxAge: 54000,
-          secure: process.env.NODE_ENV === "production",
+      res.cookie("authToken", authToken, {
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          secure: process.env.NODE_ENV === "production",
+          httpOnly: true,
+          maxAge:  900000, // => 900,000 ms = 15 m
         })
         .json({ message: "Trainee account login successfully" })
     }
