@@ -213,22 +213,14 @@ const putUpdateCustomExercise = async (req, res) => {
 
 const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => { 
   try {
-    const { exerciseRoutineId } = req.body
     const { customExerciseId, traineeId } = req.params
-
-    if (!exerciseRoutineId) {
-      res.status(400).json({ message: "exerciseRoutineId is required" })
-      return
-    }
-
     const customExerciseInDB = await CustomExercise.findById(customExerciseId)
     if (!customExerciseInDB) {
       res.status(404).json({ message: "Custom Exercise not found in DB" })
       return
     }
 
-    const customExerciseInRoutine = await ExerciseRoutine.find({
-      _id: exerciseRoutineId,
+    const customExerciseInRoutine = await ExerciseRoutine.findOne({
       exerciseList: customExerciseId,
     })
     if (!customExerciseInRoutine) {
@@ -238,11 +230,20 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
       return
     }
 
+    const customExerciseInTrainee = await Trainee.findOne({
+      _id: traineeId,
+      exercisePlan: customExerciseInRoutine._id
+    })
+    if (!customExerciseInTrainee) {
+      res.status(404).json({ message: "Custom Exercise not found in Trainee" })
+      return
+    }
+
     const deletedCustomExercise = await CustomExercise.findByIdAndDelete(customExerciseId)
     const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
-      exerciseRoutineId,
+      customExerciseInRoutine._id,
       { $pull: { exerciseList: deletedCustomExercise._id } },
-      {new: true }
+      { new: true }
     )
     const udpatedTrainee = await Trainee.findById(traineeId)
       .select("-password")

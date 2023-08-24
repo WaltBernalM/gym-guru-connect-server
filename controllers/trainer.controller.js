@@ -23,14 +23,11 @@ const getTrainer = async (req, res, next) => {
     }
 
     const isTrainer = req.payload._id === trainerId
-    if (isTrainer) {
-      if (trainerInDB.trainees.length > 0) { 
-        res.status(200).json(await trainerInDB.populate("trainees"))
-      } else {
-        res.status(200).json(trainerInDB)
-      }
+    if (isTrainer) { 
+      res.status(200).json(await trainerInDB.populate('trainees'))
     } else {
-      res.status(200).json(trainerInDB)
+      const { trainees, ...trainerInfo} = trainerInDB.toObject()
+      res.status(200).json( trainerInfo )
     }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })

@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose')
 
 const portionSchema = new Schema(
   {
-    number: {
+    portionNumber: {
       type: Number,
       enum: [1, 2, 3, 4, 5, 6],
       required: [true, "Must be a whole number from 1 to 6"]
