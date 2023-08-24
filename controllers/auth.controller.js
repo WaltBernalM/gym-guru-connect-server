@@ -5,16 +5,16 @@ const jwt = require("jsonwebtoken")
 
 exports.postSignupController = async (req, res, next) => { 
   try {
-    const { name, password, email, isTrainer } = req.body
+    const { firstName, lastName, password, email, isTrainer } = req.body
 
-    if (!email || !password || !name) {
-      res.status(400).json({ message: "all fields required (name, password, email)" })
+    if (!email || !password || !firstName || !lastName) {
+      res.status(400).json({ message: "All fields required (name, password, email)" })
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
     if (!emailRegex.test(email)) {
-      res.status(400).json({ message: "email format invalid" })
+      res.status(400).json({ message: "Email format invalid" })
       return
     }
 
@@ -22,16 +22,25 @@ exports.postSignupController = async (req, res, next) => {
     if (!passwordRegex.test(password)) {
       res.status(400).json({
         message: `The password is as weak as Yamcha.
-      Must have at least 5 chars, must use uppercased, 
+      Must have at least 6 chars, must use uppercased, 
       and lowercased letters and have at least a number`,
       })
+      return
+    }
+
+    if (
+      !String(email).endsWith("hotmail.com") &&
+      !String(email).endsWith("gmail.com") &&
+      !String(email).endsWith("outlook.com")
+    ) {
+      res.status(400).json({ message: `We are limited to accept emails from Gmail, Outlook or Hotmail ${email}` })
       return
     }
 
     if (isTrainer) {
       const trainerFound = await Trainer.findOne({ email })
       if (trainerFound) {
-        res.status(400).json({ message: "Trainer account already exists" })
+        res.status(400).json({ message: "Email already registered" })
         return
       }
     } else if (!isTrainer) { 
@@ -48,7 +57,7 @@ exports.postSignupController = async (req, res, next) => {
     if (isTrainer) {
       const createdTrainer = await Trainer.create({
         email,
-        name,
+        name: { firstName, lastName },
         password: hashPassword,
       })
       const { email: savedEmail, name: savedName, _id: trainerId } = createdTrainer
@@ -56,7 +65,7 @@ exports.postSignupController = async (req, res, next) => {
     } else if (!isTrainer) {
       const createdTrainee = await Trainee.create({
         email,
-        name,
+        name: { firstName, lastName },
         password: hashPassword,
       })
       const { email: savedEmail, name: savedName, _id: traineeId } = createdTrainee
@@ -140,6 +149,14 @@ exports.postLoginController = async (req, res, next) => {
         })
         .json({ message: "Trainee account login successfully" })
     }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" })
+  }
+}
+
+exports.getVerifyController = async (req, res, next) => { 
+  try {
+    res.status(200).json(req.payload)
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
   }
