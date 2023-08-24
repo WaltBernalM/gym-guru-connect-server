@@ -15,8 +15,18 @@ const getTrainee = async (req, res, next) => {
           }
         }
       })
+      .populate({
+        path: 'nutritionPlan',
+        populate: {
+          path: 'foodList'
+        }
+      })
     
-    res.status(200).json(traineeInDB)
+    const clonedTrainee = JSON.parse(JSON.stringify(traineeInDB))
+    clonedTrainee.exercisePlan.sort((a, b) => a.day - b.day)
+    clonedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)
+
+    res.status(200).json(clonedTrainee)
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error })
   }

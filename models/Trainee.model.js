@@ -40,29 +40,10 @@ const traineeSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "ExerciseRoutine"
     }],
-    mealPlan: {
-      type: Object,
-      default: {
-        portion1: {
-          foods: [],
-        },
-        portion2: {
-          foods: [],
-        },
-        portion3: {
-          foods: [],
-        },
-        portion4: {
-          foods: [],
-        },
-        portion5: {
-          foods: [],
-        },
-        portion6: {
-          foods: [],
-        },
-      },
-    },
+    nutritionPlan: [{
+      type: Schema.Types.ObjectId,
+      ref: "Portion"
+    }]
   },
   {
     timestamps: true,
