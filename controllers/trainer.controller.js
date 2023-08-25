@@ -22,12 +22,25 @@ const getTrainer = async (req, res, next) => {
       trainerInDB = await trainerInDB.populate("schedule")
     }
 
+    const clonedTrainer = JSON.parse(JSON.stringify(trainerInDB))
+    clonedTrainer.schedule = clonedTrainer.schedule.sort(
+      (a, b) =>
+        new Date(a.dayInfo).setHours(a.hour) -
+        new Date(b.dayInfo).setHours(b.hour)
+    )
+
     const isTrainer = req.payload._id === trainerId
     if (isTrainer) { 
-      res.status(200).json(await trainerInDB.populate('trainees'))
+      const updatedTrainer = await trainerInDB.populate('trainees')
+      const clone = JSON.parse(JSON.stringify(updatedTrainer))
+      clone.schedule = clone.schedule.sort(
+        (a, b) =>
+          new Date(a.dayInfo).setHours(a.hour) -
+          new Date(b.dayInfo).setHours(b.hour)
+      )
+      res.status(200).json(clone)
     } else {
-      const { trainees, ...trainerInfo} = trainerInDB.toObject()
-      res.status(200).json( trainerInfo )
+      res.status(200).json(clonedTrainer)
     }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
