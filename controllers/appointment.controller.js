@@ -29,11 +29,11 @@ const postCreateAppointment = async (req, res, next) => {
     const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
 
     const today = new Date(currentDate)
-    if (new Date(dateInput) < today.setDate(today.getDate() + 1)) {
+    if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
       res
         .status(400)
         .json({
-          message: "dayInfo cannot be in the past or in within the next 24h",
+          message: "dayInfo cannot be in the past or in within the next 48h",
         })
       return
     }
@@ -57,7 +57,7 @@ const postCreateAppointment = async (req, res, next) => {
     if (slotTaken) {
       res
         .status(409)
-        .json({ message: "Appointment slot is already in schedule" })
+        .json({ message: `${dayInfo} @ ${hour}:00 is already in schedule` })
       return
     }
 
@@ -84,17 +84,23 @@ const postCreateAppointment = async (req, res, next) => {
 const getAllAppointmentsByTrainer = async (req, res, next) => {
   try {
     const { trainerId } = req.params
-    const { _id: traineeId } = req.payload
 
-    const trainerInDB = await Trainer.findById(trainerId).populate('schedule')
-    const trainerWithTrainee = await Trainer.findOne({trainees: traineeId})
+    const trainerInDB = await Trainer.findById(trainerId)
+      .populate({
+        path: "schedule",
+        populate: {
+          path: "traineeId",
+        },
+      })
+    
+    const { schedule } = trainerInDB
+    const sortedSchedule = schedule.sort(
+      (a, b) =>
+        new Date(a.dayInfo).setHours(a.hour) -
+        new Date(b.dayInfo).setHours(b.hour)
+    )
 
-    if (JSON.stringify(trainerWithTrainee._id) !== JSON.stringify(trainerInDB._id)) { 
-      res.status(404).json({ message: "Trainee not found in Trainer's list" })
-      return
-    }
-
-    res.status(200).json({ schedule: trainerInDB.schedule })
+    res.status(200).json({ schedule: sortedSchedule })
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
@@ -142,7 +148,9 @@ const putAddTrainee = async (req, res, next) => {
       { new: true }
     )
     
-    res.status(200).json({ message: "A Trainee has been booked", updatedAppointment })
+    res.status(200).json({
+      message: `${updatedAppointment.dayInfo} @ ${updatedAppointment.hour}:00 booked`, updatedAppointment
+    })
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
