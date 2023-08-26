@@ -33,7 +33,7 @@ const postCreateAppointment = async (req, res, next) => {
       res
         .status(400)
         .json({
-          message: "dayInfo cannot be in the past or in within the next 48h",
+          message: "Cannot create dates before the next 48 hours",
         })
       return
     }
@@ -234,9 +234,29 @@ const deleteAppointment = async (req, res, next) => {
       trainerId,
       { $pull: { schedule: appointmentId } },
       { new: true }
-    ).select('-password')
+    )
+      .select("-password")
+      .select("-trainees")
+      .populate({
+        path: "schedule",
+        populate: {
+          path: 'traineeId'
+        }
+      })
+    
+    const sortedSchedule = updatedTrainer.schedule.sort(
+      (a, b) =>
+        new Date(a.dayInfo).setHours(a.hour) -
+        new Date(b.dayInfo).setHours(b.hour)
+    )
 
-    res.status(200).json({message: "Appointment deleted", deletedAppointment, updatedTrainer})
+    res
+      .status(200)
+      .json({
+        message: "Appointment deleted",
+        deletedAppointment,
+        schedule: sortedSchedule,
+      })
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
   }
