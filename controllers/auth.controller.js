@@ -167,3 +167,11 @@ exports.getVerifyController = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" })
   }
 }
+
+exports.postLogout = async (req, res, next) => {
+  res.cookie("authToken", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  })
+  res.status(200).json({ message: "successful logout" })
+}
