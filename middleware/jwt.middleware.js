@@ -28,6 +28,8 @@ const isTokenValid = (tokenVersion, currentVersion) => {
 const isAuthenticated = async (req, res, next) => { 
   const token = req.cookies.authToken
 
+  console.log('authToken', token)
+
   if (!token) return res.status(401).json({ message: 'Unauthorized' })
   
   try {
