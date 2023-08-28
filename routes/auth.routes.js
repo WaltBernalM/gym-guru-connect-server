@@ -12,7 +12,7 @@ router.post("/signup", postSignupController)
 
 router.post("/login", postLoginController)
 
-router.get("/verify", isValidTokenVer, isAuthenticated, getVerifyController)
+router.get("/verify", isAuthenticated, isValidTokenVer, getVerifyController)
 
 router.post('/logout', isAuthenticated, postLogout )
 
