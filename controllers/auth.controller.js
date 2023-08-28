@@ -169,17 +169,6 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-
-  // added line for testing
-  const authToken = req.cookies.authToken
-  console.log('authToken in logout endpoint', authToken)
-
-  // const decodedAuthToken = jwt.decode(authToken)
-  // if (decodedAuthToken) {
-  //   console.log(decodedAuthToken)
-  //   revokedTokens.add(decodedAuthToken._id)
-  // }
-
   res.cookie("authToken", "", {
     httpOnly: true,
     expires: new Date(0),
