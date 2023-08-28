@@ -22,6 +22,8 @@ const getTrainee = async (req, res, next) => {
         }
       })
     
+    
+    
     const clonedTrainee = JSON.parse(JSON.stringify(traineeInDB))
     clonedTrainee.exercisePlan.sort((a, b) => a.day - b.day)
     clonedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)

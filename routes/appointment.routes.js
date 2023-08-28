@@ -3,6 +3,7 @@ const router = require("express").Router()
 const {
   postCreateAppointment,
   getAllAppointmentsByTrainer,
+  getAllAppointmentsForTrainee,
   putAddTrainee,
   patchRemoveTrainee,
   deleteAppointment,
@@ -24,8 +25,11 @@ const { appointmentAvailable } = require("../middleware/appointmentAvailable.mid
 // Create available Appointment and add it to Trainer (creation of appointments from 24 hours)
 router.post("/trainer/:trainerId", isAllowedTrainer, postCreateAppointment)
 
-// Get alla Appointments from Trainer
+// Get all Appointments from Trainer
 router.get('/trainer/:trainerId', isAllowedTrainer, getAllAppointmentsByTrainer)
+
+// Get all Appointments from Trainee
+router.get("/trainee/:traineeId", isAllowedTrainee, getAllAppointmentsForTrainee)
 
 // Updated Appointment from trainer's list to add a trainee (only before 48 hours)
 router.put(

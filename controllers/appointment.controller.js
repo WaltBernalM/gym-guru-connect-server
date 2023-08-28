@@ -106,6 +106,20 @@ const getAllAppointmentsByTrainer = async (req, res, next) => {
   }
 }
 
+const getAllAppointmentsForTrainee = async (req, res, next) => {
+  try {
+    const { traineeId } = req.params
+    const appointmentsInDB = await Appointment.find({ traineeId })
+
+    const sortedAppointments = JSON.parse(JSON.stringify(appointmentsInDB))
+      .sort((a, b) => new Date(a.dayInfo).setHours(a.hour) - new Date(b.dayInfo).setHours(b.hour))
+
+    res.status(200).json(sortedAppointments)
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" })
+  }
+}
+
 const putAddTrainee = async (req, res, next) => {
   try {
     const { appointmentId, traineeId } = req.params
@@ -205,7 +219,6 @@ const patchRemoveTrainee = async (req, res, next) => {
   }
 }
 
-
 const deleteAppointment = async (req, res, next) => {
   try {
     const { appointmentId, trainerId } = req.params
@@ -266,6 +279,7 @@ const deleteAppointment = async (req, res, next) => {
 module.exports = {
   postCreateAppointment,
   getAllAppointmentsByTrainer,
+  getAllAppointmentsForTrainee,
   putAddTrainee,
   patchRemoveTrainee,
   deleteAppointment,

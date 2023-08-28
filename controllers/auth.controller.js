@@ -119,14 +119,14 @@ exports.postLoginController = async (req, res, next) => {
           version: getCurrentTokenVersion(), // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
-        { algorithm: "HS256", expiresIn: "1m" }
+        { algorithm: "HS256", expiresIn: "15m" }
       )
       // res.status(200).json({ data: { authToken } })
       res
         .cookie("authToken", authToken, {
           httpOnly: true,
-          // maxAge:  900000, // => 900,000 ms = 15 m
-          maxAge: 60000, // => 60,000 ms = 1 m
+          maxAge:  900000, // => 900,000 ms = 15 m
+          // maxAge: 60000, // => 60,000 ms = 1 m
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
@@ -149,7 +149,7 @@ exports.postLoginController = async (req, res, next) => {
           version: getCurrentTokenVersion(), // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
-        { algorithm: "HS256", expiresIn: "1m" }
+        { algorithm: "HS256", expiresIn: "15m" }
       )
       // res.status(200).json({ data: { authToken } })
       res
@@ -157,8 +157,8 @@ exports.postLoginController = async (req, res, next) => {
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
           secure: process.env.NODE_ENV === "production",
           httpOnly: true,
-          // maxAge:  900000, // => 900,000 ms = 15 m
-          maxAge: 60000, // => 60,000 ms = 1 m
+          maxAge:  900000, // => 900,000 ms = 15 m
+          // maxAge: 60000, // => 60,000 ms = 1 m
         })
         .json({ message: "Trainee account login successfully" })
     }
