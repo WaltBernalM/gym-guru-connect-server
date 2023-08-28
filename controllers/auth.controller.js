@@ -117,7 +117,7 @@ exports.postLoginController = async (req, res, next) => {
           name: trainerInDB.name,
           isTrainer: trainerInDB.isTrainer,
           version: getCurrentTokenVersion(), // added for token invalidation
-          issuedAt: new Date.now(), // added for token invalidation
+          // issuedAt: new Date.now(), // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "15m" }
@@ -146,7 +146,7 @@ exports.postLoginController = async (req, res, next) => {
           name: traineeInDB.name,
           isTrainer: traineeInDB.isTrainer,
           version: getCurrentTokenVersion(), // added for token invalidation
-          issuedAt: new Date.now() // added for token invalidation
+          // issuedAt: new Date.now() // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "1h" }
