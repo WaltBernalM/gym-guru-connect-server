@@ -176,7 +176,6 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-  incrementTokenVersion()
   res.cookie("authToken", "", {
     httpOnly: true,
     expires: new Date(0),

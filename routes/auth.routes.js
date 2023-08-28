@@ -5,13 +5,14 @@ const {
   getVerifyController,
   postLogout,
 } = require("../controllers/auth.controller")
+const { isValidTokenVer } = require("../middleware/isValidTokenVer")
 const { isAuthenticated } = require("../middleware/jwt.middleware")
 
 router.post("/signup", postSignupController)
 
 router.post("/login", postLoginController)
 
-router.get('/verify', isAuthenticated, getVerifyController)
+router.get('/verify', isAuthenticated, isValidTokenVer, getVerifyController)
 
 router.post('/logout', isAuthenticated, postLogout )
 
