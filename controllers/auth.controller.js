@@ -2,6 +2,7 @@ const Trainer = require('../models/Trainer.model')
 const Trainee = require('../models/Trainee.model')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const { getCurrentTokenVersion, incrementTokenVersion } = require('./config')
 
 exports.postSignupController = async (req, res, next) => { 
   try {
@@ -114,7 +115,9 @@ exports.postLoginController = async (req, res, next) => {
           _id: trainerInDB._id,
           email: trainerInDB.email,
           name: trainerInDB.name,
-          isTrainer: trainerInDB.isTrainer
+          isTrainer: trainerInDB.isTrainer,
+          version: getCurrentTokenVersion(), // added for token invalidation
+          issuedAt: new Date.now(), // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "15m" }
@@ -141,7 +144,9 @@ exports.postLoginController = async (req, res, next) => {
           _id: traineeInDB._id,
           email: traineeInDB.email,
           name: traineeInDB.name,
-          isTrainer: traineeInDB.isTrainer
+          isTrainer: traineeInDB.isTrainer,
+          version: getCurrentTokenVersion(), // added for token invalidation
+          issuedAt: new Date.now() // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "1h" }
@@ -169,6 +174,7 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
+  incrementTokenVersion()
   res.cookie("authToken", "", {
     httpOnly: true,
     expires: new Date(0),
