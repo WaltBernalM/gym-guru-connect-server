@@ -55,13 +55,18 @@ const getAllExercises = async (req, res, next) => {
 
 const postCustomExerciseToTraineePlan = async (req, res, next) => {
   try {
-    const { reps, intensity, exerciseRoutineId } = req.body
+    const { reps, intensity, exerciseRoutineId, series } = req.body
     const { exerciseId, traineeId } = req.params
-    if (!reps || !intensity || !exerciseRoutineId) {
+    if (!reps || !intensity || !exerciseRoutineId || !series) {
       res
         .status(400)
-        .json({ message: "reps, intensity and day are required" })
+        .json({ message: "series, reps, intensity are required" })
       return
+    }
+    if (series < 1 || series > 20 || series % 1 !== 0) {
+      res
+        .status(400)
+        .json({ message: "reps must be a integer number between 1 and 20" })
     }
     if (reps < 1 || (reps > 300 && reps % 1 !== 0)) {
       res
@@ -100,6 +105,7 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
     // Creates a new custom exercise
     const newCustomExercise = await (await CustomExercise.create({
       reps,
+      series,
       intensity,
       exerciseData: exerciseId
     })).populate('exerciseData')

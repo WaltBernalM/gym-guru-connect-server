@@ -1,3 +1,4 @@
+const Trainee = require("../models/Trainee.model")
 const Trainer = require("../models/Trainer.model")
 
 const getAllTrainers = async (req, res, next) => {
@@ -82,11 +83,17 @@ const putAddTrainee = async (req, res, next) => {
       { $push: { trainees: traineeId } },
       { new: true }
     )
+
+    const updatedTrainee = await Trainee.findByIdAndUpdate(
+      traineeId,
+      { trainerId },
+      { new: true}
+    )
     
     if (currentTrainer) {
-      res.status(200).json({ message: `Trainee removed from previous Trainer and assigned to the new Trainer`, previousTrainer: currentTrainer._id, newTrainer: newTrainer._id })
+      res.status(200).json({ message: `Trainee removed from previous Trainer and assigned to the new Trainer`, previousTrainer: currentTrainer, newTrainer: newTrainer })
     } else {
-      res.status(200).json({ message: `Trainee added to a Trainer`, newTrainer: newTrainer._id})
+      res.status(200).json({ message: `Trainee added to a Trainer`, newTrainer})
     }
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
