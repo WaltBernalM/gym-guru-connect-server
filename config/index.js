@@ -26,8 +26,8 @@ module.exports = (app) => {
     cors({
       origin: [FRONTEND_URL], // added comma
       credentials: true, // allow credentials
-      // methods: 'GET, POST, PUT, PATCH, DELETE', // allowed methods
-      // allowedHeaders: 'Content-Type, Authorization' // allowed headers
+      methods: 'GET, POST, PUT, PATCH, DELETE', // allowed methods
+      allowedHeaders: 'Content-Type, Authorization' // allowed headers
     })
   );
 
