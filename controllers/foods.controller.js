@@ -137,11 +137,40 @@ const postFoodToTraineePortion = async (req, res) => {
   }
 }
 
+const getCustomFoodInTraineePortion = async (req, res, next) => { 
+  try {
+    const { foodId, traineeId, portionId } = req.params
+
+    const customFoodInDB = await Food.findById(foodId)
+    if (!customFoodInDB) { 
+      res.status(404).json({ message: "Food not found in database" })
+      return
+    }
+    const portionInDB = await Portion.findById(portionId)
+    if (!portionInDB) {
+      res.status(404).json({ message: "Food not found in database" })
+      return
+    }
+    const portionInTrainee = await Trainee.findOne({ _id: traineeId, nutritionPlan: portionId })
+    if (!portionInTrainee) {
+      res.status(404).json({ message: "Food of Portion not found in trainee data" })
+      return
+    }
+
+    res.status(200).json(customFoodInDB)
+
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" })
+  }
+}
+
 const putUpdateFood = async (req, res) => {
   try {
     const { foodId, traineeId } = req.params
     const { serving_size_g } = req.body
     const numberFields = [serving_size_g]
+
+    console.log( req.body)
     
     if (!isValidObjectId(foodId)) {
       res.status(400).json({ message: "Invalid foodId" })
@@ -188,7 +217,7 @@ const putUpdateFood = async (req, res) => {
         },
       })
 
-    res.status(200).json({ updatedTrainee })
+    res.status(200).json({ updatedFood })
 
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
@@ -248,6 +277,7 @@ const deleteFoodAndRemoveFromTraineePortion = async (req, res, next) => {
 
 module.exports = {
   getQueryFood,
+  getCustomFoodInTraineePortion,
   postFoodToTraineePortion,
   putUpdateFood,
   deleteFoodAndRemoveFromTraineePortion,
