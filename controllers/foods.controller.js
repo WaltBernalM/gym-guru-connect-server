@@ -9,36 +9,18 @@ const Trainer = require('../models/Trainer.model')
 
 const getQueryFood = async (req, res, next) => {
   try {
-    const { serving_size_g, name } = req.body
-
-    if (!serving_size_g || !name) {
-      res.status(400).json({ message: 'serving_size_g and name are required' })
-      return
-    }
-
-    if (typeof serving_size_g !== 'number' || typeof name !== 'string') { 
-      res.status(400).json({ message: "serving_size_g and name must be string type" })
-      return
-    }
-
-    if (serving_size_g > 1000 || serving_size_g < 1 || serving_size_g % 1 !== 0) {
-      res.status(400).json({ message: 'serving_size_g must be an integer between 1 and 1000' })
-      return
-    }
+    const { query } = req.query
     
     const baseUrl = NINJA_API_URL
     const apiHeaders = {
       "X-Api-Key": process.env.NINJA_API_KEY,
     }
     
-    const queryString = `${serving_size_g}g ${name}`
-    
     const { data: foods } = await axios.get(
-      `${baseUrl}/nutrition?query=${queryString}`,
+      `${baseUrl}/nutrition?query=${query}`,
       { headers: apiHeaders }
     )
 
-    console.log(foods)
     res.status(200).json({ foods })
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
@@ -127,7 +109,19 @@ const postFoodToTraineePortion = async (req, res) => {
       { new: true }
     ).populate('foodList')
 
-    res.status(201).json({newFood, updatedPortion})
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .select("-exercisePlan")
+      .populate({
+        path: "nutritionPlan",
+        populate: {
+          path: "foodList",
+        },
+      })
+    
+    const updatedNutritionPlan = updatedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)
+
+    res.status(201).json({newFood, updatedPortion, updatedNutritionPlan})
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
@@ -137,11 +131,40 @@ const postFoodToTraineePortion = async (req, res) => {
   }
 }
 
+const getCustomFoodInTraineePortion = async (req, res, next) => { 
+  try {
+    const { foodId, traineeId, portionId } = req.params
+
+    const customFoodInDB = await Food.findById(foodId)
+    if (!customFoodInDB) { 
+      res.status(404).json({ message: "Food not found in database" })
+      return
+    }
+    const portionInDB = await Portion.findById(portionId)
+    if (!portionInDB) {
+      res.status(404).json({ message: "Food not found in database" })
+      return
+    }
+    const portionInTrainee = await Trainee.findOne({ _id: traineeId, nutritionPlan: portionId })
+    if (!portionInTrainee) {
+      res.status(404).json({ message: "Food of Portion not found in trainee data" })
+      return
+    }
+
+    res.status(200).json(customFoodInDB)
+
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" })
+  }
+}
+
 const putUpdateFood = async (req, res) => {
   try {
     const { foodId, traineeId } = req.params
     const { serving_size_g } = req.body
     const numberFields = [serving_size_g]
+
+    console.log( req.body)
     
     if (!isValidObjectId(foodId)) {
       res.status(400).json({ message: "Invalid foodId" })
@@ -188,7 +211,7 @@ const putUpdateFood = async (req, res) => {
         },
       })
 
-    res.status(200).json({ updatedTrainee })
+    res.status(200).json({ updatedFood })
 
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
@@ -236,7 +259,21 @@ const deleteFoodAndRemoveFromTraineePortion = async (req, res, next) => {
       { new: true }
     )
 
-    res.status(200).json({ message: "food deleted successfully", deletedFood, updatedPortion })
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .select("-exercisePlan")
+      .populate({
+        path: "nutritionPlan",
+        populate: {
+          path: "foodList",
+        },
+      })
+
+    const updatedNutritionPlan = updatedTrainee.nutritionPlan.sort(
+      (a, b) => a.portionNumber - b.portionNumber
+    )
+
+    res.status(200).json({ message: "food deleted successfully", deletedFood, updatedPortion, updatedNutritionPlan })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
@@ -248,6 +285,7 @@ const deleteFoodAndRemoveFromTraineePortion = async (req, res, next) => {
 
 module.exports = {
   getQueryFood,
+  getCustomFoodInTraineePortion,
   postFoodToTraineePortion,
   putUpdateFood,
   deleteFoodAndRemoveFromTraineePortion,

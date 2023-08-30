@@ -25,6 +25,10 @@ const traineeSchema = new Schema(
       type: Boolean,
       default: false
     },
+    trainerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Trainer"
+    },
     personalInfo: {
       type: Object,
       default: {

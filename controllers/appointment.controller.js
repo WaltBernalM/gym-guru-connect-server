@@ -200,7 +200,7 @@ const patchRemoveTrainee = async (req, res, next) => {
     const today = new Date(currentDate)
     if (new Date(dateInAppointment) < today.setDate(today.getDate() + 2)) {
       res.status(400).json({
-        message: "Cannot remove eppointment prior to 48 hours",
+        message: "Cannot remove appointment prior to 48 hours",
       })
       return
     }

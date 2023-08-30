@@ -6,12 +6,17 @@ const customExercise = new Schema(
       type: Number,
       required: [true, "intensity is a rqeuired property"],
     },
+    series: {
+      type: Number,
+      required: [true, "series is a required property"],
+      default: 5,
+    },
     reps: {
-      type: Number, 
+      type: Number,
       required: [true, "reps is a required property"],
       default: 12,
     },
-    exerciseData:{
+    exerciseData: {
       type: Schema.Types.ObjectId,
       ref: "Exercise",
     },

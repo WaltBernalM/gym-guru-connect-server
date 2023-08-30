@@ -20,13 +20,14 @@ const { isAllowedTrainee } = require("../middleware/isAllowedTrainee.middleware"
 
 // Verifies Appointment existance in DB,  if Appointment is avaible to edit, if trainer is in DB, if appointment is inside trainers schedule and if trainee is inside trainer list of trainees.
 const { appointmentAvailable } = require("../middleware/appointmentAvailable.middleware")
+const { isAllowedTraineeOrTrainer } = require("../middleware/isAllowedTraineeOrTrainer")
 
 
 // Create available Appointment and add it to Trainer (creation of appointments from 24 hours)
 router.post("/trainer/:trainerId", isAllowedTrainer, postCreateAppointment)
 
 // Get all Appointments from Trainer
-router.get('/trainer/:trainerId', isAllowedTrainer, getAllAppointmentsByTrainer)
+router.get('/trainer/:trainerId', isAllowedTraineeOrTrainer, getAllAppointmentsByTrainer)
 
 // Get all Appointments from Trainee
 router.get("/trainee/:traineeId", isAllowedTrainee, getAllAppointmentsForTrainee)

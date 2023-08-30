@@ -5,6 +5,7 @@ const {
   postFoodToTraineePortion,
   putUpdateFood,
   deleteFoodAndRemoveFromTraineePortion,
+  getCustomFoodInTraineePortion,
 } = require("../controllers/foods.controller")
 
 const router = require("express").Router()
@@ -19,6 +20,9 @@ router.post(
   selfTraineeOrAllowedTrainer,
   postFoodToTraineePortion
 )
+
+// Gets the custom food info from a trainee by its id
+router.get('/:foodId/trainee/:traineeId/portion/:portionId', selfTraineeOrAllowedTrainer, getCustomFoodInTraineePortion)
 
 // Updates food data by a new food API query
 router.put(

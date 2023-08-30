@@ -21,8 +21,10 @@ const getTrainee = async (req, res, next) => {
           path: 'foodList'
         }
       })
-    
-    
+      .populate({
+        path: 'trainerId',
+        select: 'name _id'
+      })
     
     const clonedTrainee = JSON.parse(JSON.stringify(traineeInDB))
     clonedTrainee.exercisePlan.sort((a, b) => a.day - b.day)
