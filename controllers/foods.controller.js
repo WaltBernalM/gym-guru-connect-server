@@ -259,7 +259,21 @@ const deleteFoodAndRemoveFromTraineePortion = async (req, res, next) => {
       { new: true }
     )
 
-    res.status(200).json({ message: "food deleted successfully", deletedFood, updatedPortion })
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .select("-exercisePlan")
+      .populate({
+        path: "nutritionPlan",
+        populate: {
+          path: "foodList",
+        },
+      })
+
+    const updatedNutritionPlan = updatedTrainee.nutritionPlan.sort(
+      (a, b) => a.portionNumber - b.portionNumber
+    )
+
+    res.status(200).json({ message: "food deleted successfully", deletedFood, updatedPortion, updatedNutritionPlan })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
