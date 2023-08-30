@@ -9,36 +9,18 @@ const Trainer = require('../models/Trainer.model')
 
 const getQueryFood = async (req, res, next) => {
   try {
-    const { serving_size_g, name } = req.body
-
-    if (!serving_size_g || !name) {
-      res.status(400).json({ message: 'serving_size_g and name are required' })
-      return
-    }
-
-    if (typeof serving_size_g !== 'number' || typeof name !== 'string') { 
-      res.status(400).json({ message: "serving_size_g and name must be string type" })
-      return
-    }
-
-    if (serving_size_g > 1000 || serving_size_g < 1 || serving_size_g % 1 !== 0) {
-      res.status(400).json({ message: 'serving_size_g must be an integer between 1 and 1000' })
-      return
-    }
+    const { query } = req.query
     
     const baseUrl = NINJA_API_URL
     const apiHeaders = {
       "X-Api-Key": process.env.NINJA_API_KEY,
     }
     
-    const queryString = `${serving_size_g}g ${name}`
-    
     const { data: foods } = await axios.get(
-      `${baseUrl}/nutrition?query=${queryString}`,
+      `${baseUrl}/nutrition?query=${query}`,
       { headers: apiHeaders }
     )
 
-    console.log(foods)
     res.status(200).json({ foods })
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
@@ -127,7 +109,19 @@ const postFoodToTraineePortion = async (req, res) => {
       { new: true }
     ).populate('foodList')
 
-    res.status(201).json({newFood, updatedPortion})
+    const updatedTrainee = await Trainee.findById(traineeId)
+      .select("-password")
+      .select("-exercisePlan")
+      .populate({
+        path: "nutritionPlan",
+        populate: {
+          path: "foodList",
+        },
+      })
+    
+    const updatedNutritionPlan = updatedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)
+
+    res.status(201).json({newFood, updatedPortion, updatedNutritionPlan})
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
