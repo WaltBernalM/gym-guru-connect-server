@@ -71,6 +71,32 @@ const postCreatePortion = async (req, res, next) => {
   }
 }
 
+const getPortionInfo = async (req, res, next) => {
+  try {
+    const { portionId, traineeId } = req.params
+
+    if (!portionId || !traineeId) { 
+      res.status(400).json({ message: 'Invalid Request' })
+      return
+    }
+
+    portionInDB = await Portion.findById(portionId)
+    if (!portionInDB) {
+      res.status(404).json({ message: "Portion not found in DB" })
+      return
+    }
+
+    res.status(200).json({ portionInfo: portionInDB })
+    
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).json({ error })
+    } else {
+      res.status(500).json({ message: "Internal Server Error" })
+    }
+  }
+}
+
 const putUpdatePortion = async (req, res) => {
   try {
     const { portionId, traineeId } = req.params
@@ -192,4 +218,9 @@ const deletePortion = async (req, res) => {
   }
 }
 
-module.exports = { postCreatePortion, putUpdatePortion, deletePortion }
+module.exports = {
+  postCreatePortion,
+  getPortionInfo,
+  putUpdatePortion,
+  deletePortion,
+}
