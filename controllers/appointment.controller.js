@@ -36,8 +36,6 @@ const postCreateAppointment = async (req, res, next) => {
     const today = new Date(currentDate)
     const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
     const todayPlusTwo = new Date(todayAddTwo)
-
-    console.log(fixedInput)
     
     if (process.env.NODE_ENV === 'production') {
       if (fixedInputDate < todayPlusTwo) {
@@ -63,12 +61,23 @@ const postCreateAppointment = async (req, res, next) => {
     const trainer = await Trainer.findById(trainerId).populate("schedule")
     const { schedule: trainerSchedule } = trainer
     let slotTaken = false
-    trainerSchedule.forEach((appointment) => {
-      if (appointment.hour === hour && appointment.dayInfo === dateInput) {
-        slotTaken = true
-        return
-      }
-    })
+
+    if (process.env.NODE_ENV === 'production') { 
+      trainerSchedule.forEach((appointment) => {
+        if (appointment.hour === hour && appointment.dayInfo === fixedInput) {
+          slotTaken = true
+          return
+        }
+      })
+    } else {
+      trainerSchedule.forEach((appointment) => {
+        if (appointment.hour === hour && appointment.dayInfo === dateInput) {
+          slotTaken = true
+          return
+        }
+      })
+    }
+
     if (slotTaken) {
       res
         .status(409)
