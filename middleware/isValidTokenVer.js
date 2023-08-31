@@ -5,7 +5,7 @@ exports.isValidTokenVer = async (req, res, next) => {
   try {
     const tokenVersion = req.payload.version
     const currentTokenVersion = getCurrentTokenVersion()
-    console.log(currentTokenVersion, tokenVersion)
+    console.log('token versions: ', currentTokenVersion, tokenVersion)
     if (tokenVersion !== currentTokenVersion) {
       return res.status(401).json({ message: "Unauthorized (invalid Token version)" })
     }
