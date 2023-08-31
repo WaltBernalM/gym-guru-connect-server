@@ -187,8 +187,10 @@ exports.getVerifyController = async (req, res, next) => {
 
 exports.postLogout = async (req, res, next) => {
   const { _id, version } = await TokenVersion.findOne()
+  console.log('logout:', _id, version)
   let tokenVersion = version + 1
   const updatedTokenVersion = await TokenVersion.findByIdAndUpdate(_id, { version: tokenVersion })
+  console.log("logout:", updatedTokenVersion.version)
   res.cookie("authToken", "", {
     httpOnly: true,
     expires: new Date(0),
