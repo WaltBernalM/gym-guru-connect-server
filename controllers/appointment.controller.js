@@ -26,10 +26,11 @@ const postCreateAppointment = async (req, res, next) => {
       day: "numeric",
     }
     const currentDate = new Date().toLocaleString("en-US", options)
-    const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
+    let dateInput = new Date(dayInfo).toLocaleString("en-US", options)
     
     console.log('front dayInfo:', dayInfo)
     console.log("back dateInput (from dayInfo): ", dateInput)
+    console.log("fix try: ", dateInput.setDate(dateInput.getDate() + 1))
     
     console.log('back currentDate: ', currentDate)
     
