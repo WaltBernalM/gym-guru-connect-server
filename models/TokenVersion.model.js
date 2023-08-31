@@ -11,4 +11,4 @@ const tokenVersionSchema = new Schema(
 )
 
 const TokenVersion = model("TokenVersion", tokenVersionSchema)
-export default TokenVersion
+module.exports = TokenVersion
