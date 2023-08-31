@@ -8,8 +8,6 @@ exports.isValidTokenVer = async (req, res, next) => {
 
     const tokenVersion = req.payload.version
     const currentTokenVersion = tokenInDB.version
-
-    console.log(tokenVersion, currentTokenVersion)
     
     if (tokenVersion !== currentTokenVersion) {
       return res.status(401).json({ message: "Unauthorized (invalid Token version)" })

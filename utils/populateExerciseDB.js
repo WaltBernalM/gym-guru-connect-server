@@ -29,7 +29,6 @@ const populateExerciseDB = async () => {
         equipment,
         instructions,
       })
-      console.log(createdExercise._id)
     }
   }
 }

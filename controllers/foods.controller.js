@@ -163,8 +163,6 @@ const putUpdateFood = async (req, res) => {
     const { foodId, traineeId } = req.params
     const { serving_size_g } = req.body
     const numberFields = [serving_size_g]
-
-    console.log( req.body)
     
     if (!isValidObjectId(foodId)) {
       res.status(400).json({ message: "Invalid foodId" })

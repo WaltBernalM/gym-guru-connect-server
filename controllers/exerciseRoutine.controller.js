@@ -149,7 +149,6 @@ const deleteExerciseRoutine = async (req, res) => {
     if (exerciseList.length > 0) {
       for (const customExercise of exerciseList) { 
         const deletedCustomExercise = await CustomExercise.findByIdAndDelete(customExercise)
-        console.log("deletedCustomExercise: ", deletedCustomExercise._id)
       }
     }
 

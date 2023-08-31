@@ -212,7 +212,6 @@ const patchRemoveTrainee = async (req, res, next) => {
       { new: true }
     )
 
-    // console.log(updatedAppointment)
     res.status(200).json({message: "Removed traineeId", updatedAppointment})
   } catch (error) {
     res.status(500).json({ message: "Internal server error" })
