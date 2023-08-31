@@ -34,7 +34,8 @@ const postCreateAppointment = async (req, res, next) => {
     const today = new Date(currentDate)
     console.log('today:', today)
     console.log("today + 2:", today.setDate(today.getDate() + 2))
-    console.lod('dateInput as Date type:', new Date(dateInput))
+    const dateDateIntput = new Date(dateInput)
+    console.lod('dateInput as Date type:', dateDateIntput)
 
     if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
       res
