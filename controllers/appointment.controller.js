@@ -40,7 +40,7 @@ const postCreateAppointment = async (req, res, next) => {
     
     const today = new Date(currentDate)
     
-    const todayPlusTwo = today.setDate(today.getDate() + 2)
+    const todayPlusTwo = new Date(today.setDate(today.getDate() + 2)).toLocaleDateString("en-US", options)
     console.log(fixedInputDate, todayPlusTwo)
     
     
