@@ -1,5 +1,5 @@
 const { getCurrentTokenVersion } = require("../controllers/config")
-const { default: TokenVersion } = require("../models/TokenVersion.model")
+const TokenVersion = require("../models/TokenVersion.model")
 
 
 exports.isValidTokenVer = async (req, res, next) => { 
