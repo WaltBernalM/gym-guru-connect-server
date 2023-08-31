@@ -5,8 +5,8 @@ const TokenVersion = require("../models/TokenVersion.model")
 exports.isValidTokenVer = async (req, res, next) => { 
   try {
     const isAnyTokenInDB = await TokenVersion.find()
-    if (!isAnyTokenInDB) {
-      await TokenVersion.create({ version: 1 })
+    if (isAnyTokenInDB.length === 0) {
+      await TokenVersion.create()
     }
 
     const currentTokenVersionInDB = await TokenVersion.find()
