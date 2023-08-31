@@ -77,7 +77,7 @@ const postCreateAppointment = async (req, res, next) => {
     }
 
     const createdAppointment = await Appointment.create({
-      dayInfo: dateInput,
+      dayInfo: process.env.NODE_ENV === 'production' ? fixedInput : dateInput,
       hour,
     })
     const updatedTrainer = await Trainer.findByIdAndUpdate(
