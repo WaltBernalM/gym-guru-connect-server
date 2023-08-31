@@ -106,7 +106,7 @@ exports.postLoginController = async (req, res, next) => {
     }
 
     const tokenInDB = await TokenVersion.find()
-    console.log(tokenInDB)
+    console.log(tokenInDB.length)
 
     if (trainerInDB) {
       const isPasswordCorrect = bcrypt.compareSync(password, trainerInDB.password)
