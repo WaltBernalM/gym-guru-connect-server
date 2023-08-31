@@ -36,6 +36,8 @@ const postCreateAppointment = async (req, res, next) => {
     const today = new Date(currentDate)
     const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
     const todayPlusTwo = new Date(todayAddTwo)
+
+    console.log(fixedInput)
     
     if (process.env.NODE_ENV === 'production') {
       if (fixedInputDate < todayPlusTwo) {
