@@ -30,7 +30,9 @@ const postCreateAppointment = async (req, res, next) => {
     
     console.log('front dayInfo:', dayInfo)
     console.log("back dateInput (from dayInfo): ", dateInput)
-    console.log("fix try: ", dateInput.setDate(dateInput.getDate() + 1))
+
+    const fix = dateInput.setDate(dateInput.getDate() + 1)
+    console.log("fix try: ", fix)
     
     console.log('back currentDate: ', currentDate)
     
