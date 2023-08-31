@@ -109,6 +109,8 @@ exports.postLoginController = async (req, res, next) => {
     if (tokenInDB.length === 0) {
       await TokenVersion.create({version: 1})
     }
+    const { version: currentTokenVersion } = await TokenVersion.findOne()
+    console.log('login current token Version in db: ', currentTokenVersion)
 
     if (trainerInDB) {
       const isPasswordCorrect = bcrypt.compareSync(password, trainerInDB.password)
@@ -122,7 +124,7 @@ exports.postLoginController = async (req, res, next) => {
           email: trainerInDB.email,
           name: trainerInDB.name,
           isTrainer: trainerInDB.isTrainer,
-          version: getCurrentTokenVersion(), // added for token invalidation
+          version: currentTokenVersion, // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "1h" }
@@ -153,7 +155,7 @@ exports.postLoginController = async (req, res, next) => {
           email: traineeInDB.email,
           name: traineeInDB.name,
           isTrainer: traineeInDB.isTrainer,
-          version: getCurrentTokenVersion(), // added for token invalidation
+          version: currentTokenVersion, // added for token invalidation
         }, // payload
         process.env.SECRET_KEY, // secret key
         { algorithm: "HS256", expiresIn: "1h" }
@@ -184,7 +186,8 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-  incrementTokenVersion()
+  const {_id, version}  = await TokenVersion.findOne()
+  const updatedTokenVersion = await TokenVersion.findByIdAndUpdate(_id, {version: version++} )
   res.cookie("authToken", "", {
     httpOnly: true,
     expires: new Date(0),

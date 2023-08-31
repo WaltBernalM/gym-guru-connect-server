@@ -5,10 +5,12 @@ const TokenVersion = require("../models/TokenVersion.model")
 exports.isValidTokenVer = async (req, res, next) => { 
   try {
     const tokenInDB = await TokenVersion.findOne()
-    console.log('tokenInDB', tokenInDB)
-    
+
     const tokenVersion = req.payload.version
-    const currentTokenVersion = getCurrentTokenVersion()
+    const currentTokenVersion = tokenInDB.version
+
+    console.log(tokenVersion, currentTokenVersion)
+    
     if (tokenVersion !== currentTokenVersion) {
       return res.status(401).json({ message: "Unauthorized (invalid Token version)" })
     }
