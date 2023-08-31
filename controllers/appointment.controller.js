@@ -26,10 +26,7 @@ const postCreateAppointment = async (req, res, next) => {
       day: "numeric",
     }
     const currentDate = new Date().toLocaleString("en-US", options)
-    let dateInput = new Date(dayInfo).toLocaleString("en-US", options)
-    
-    console.log('front dayInfo:', dayInfo)
-    console.log("back dateInput (from dayInfo): ", dateInput)
+    const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
 
     const input = new Date(dateInput)
     const fix = input.setDate(input.getDate() + 2)
@@ -40,7 +37,8 @@ const postCreateAppointment = async (req, res, next) => {
     const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
     const todayPlusTwo = new Date(todayAddTwo)
 
-    console.log(fixedInputDate, todayPlusTwo)
+    console.log('dayInfo @ front: ', fixedInputDate)
+    console.log('constrain @ back: ', todayPlusTwo)
     
     
     if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
