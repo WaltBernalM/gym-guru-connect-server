@@ -59,9 +59,9 @@ const postCreatePortion = async (req, res, next) => {
       })
     
     const clonedUpdatedTrainee = JSON.parse(JSON.stringify(updatedTrainee))
-    clonedUpdatedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)
+    const updatedNutritionPlan = clonedUpdatedTrainee.nutritionPlan.sort((a, b) => a.portionNumber - b.portionNumber)
     
-    res.status(201).json({ clonedUpdatedTrainee })
+    res.status(201).json({ newPortion, updatedNutritionPlan })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
@@ -163,7 +163,11 @@ const deletePortion = async (req, res) => {
       await Food.findByIdAndDelete(foodId)
     }
 
-    const updatedTrainee = await Trainee.findById(traineeId)
+    const updatedTrainee = await Trainee.findByIdAndUpdate(
+      traineeId,
+      { $pull: {nutritionPlan: portionId} },
+      {new: true}
+    )
       .select("-password")
       .select("-exercisePlan")
       .populate({
@@ -174,11 +178,11 @@ const deletePortion = async (req, res) => {
       })
     
     const clonedUpdatedTrainee = JSON.parse(JSON.stringify(updatedTrainee))
-    clonedUpdatedTrainee.nutritionPlan.sort(
+    const updatedNutritionPlan = clonedUpdatedTrainee.nutritionPlan.sort(
       (a, b) => a.portionNumber - b.portionNumber
     )
 
-    res.status(200).json({trainee: clonedUpdatedTrain})
+    res.status(200).json({deletedPortion, updatedNutritionPlan})
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
