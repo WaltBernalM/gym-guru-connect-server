@@ -108,7 +108,7 @@ exports.postLoginController = async (req, res, next) => {
     const tokenInDB = await TokenVersion.find()
     console.log(tokenInDB.length)
     if (tokenInDB.length === 0) {
-      await TokenVersion.create()
+      await TokenVersion.create({version: 1})
     }
     const tokenCreated = await TokenVersion.find()
     console.log(tokenCreated)

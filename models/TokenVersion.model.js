@@ -4,7 +4,8 @@ const tokenVersionSchema = new Schema(
   {
     version: {
       type: Number,
-      default: 1
+      default: 1,
+      required: true
     }
   },
   { timestamps: true}
