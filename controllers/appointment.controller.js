@@ -43,7 +43,7 @@ const postCreateAppointment = async (req, res, next) => {
         return
       }
     } else {
-      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+      if (new Date(dateInput) < todayPlusTwo) {
         res.status(400).json({
           message: "Cannot create dates before the next 48 hours",
         })
@@ -189,7 +189,7 @@ const putAddTrainee = async (req, res, next) => {
         return
       }
     } else {
-      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+      if (new Date(dateInput) < todayPlusTwo) {
         res.status(400).json({
           message: "Cannot book prior to 48 hours",
         })
@@ -252,7 +252,7 @@ const patchRemoveTrainee = async (req, res, next) => {
         return
       }
     } else {
-      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+      if (new Date(dateInput) < todayPlusTwo) {
         res.status(400).json({
           message: "Cannot remove appointment prior to 48 hours",
         })
