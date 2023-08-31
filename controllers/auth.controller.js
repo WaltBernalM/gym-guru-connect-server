@@ -3,6 +3,7 @@ const Trainee = require('../models/Trainee.model')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const { getCurrentTokenVersion, incrementTokenVersion } = require('./config')
+const TokenVersion = require('../models/TokenVersion.model')
 
 exports.postSignupController = async (req, res, next) => { 
   try {
@@ -103,6 +104,9 @@ exports.postLoginController = async (req, res, next) => {
         return
       }
     }
+
+    const tokenInDB = await TokenVersion.find()
+    console.log(tokenInDB)
 
     if (trainerInDB) {
       const isPasswordCorrect = bcrypt.compareSync(password, trainerInDB.password)
