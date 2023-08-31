@@ -170,14 +170,31 @@ const putAddTrainee = async (req, res, next) => {
       day: "numeric",
     }
     const currentDate = new Date().toLocaleString("en-US", options)
-    const dateInAppointment = new Date(dayInfo).toLocaleString("en-US", options)
+    const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
+
+    const input = new Date(dateInput)
+    const fix = input.setDate(input.getDate() + 2)
+    const fixedInput = new Date(fix).toLocaleString("en-US", options)
+    const fixedInputDate = new Date(fixedInput)
 
     const today = new Date(currentDate)
-    if (new Date(dateInAppointment) < today.setDate(today.getDate() + 2)) {
-      res.status(400).json({
-        message: "Cannot book prior to 48 hours",
-      })
-      return
+    const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
+    const todayPlusTwo = new Date(todayAddTwo)
+    
+    if (process.env.NODE_ENV === "production") {
+      if (fixedInputDate < todayPlusTwo) {
+        res
+          .status(400)
+          .json({ message: "Cannot book prior to 48h" })
+        return
+      }
+    } else {
+      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+        res.status(400).json({
+          message: "Cannot book prior to 48 hours",
+        })
+        return
+      }
     }
 
     const updatedAppointment = await Appointment.findByIdAndUpdate(
@@ -216,17 +233,31 @@ const patchRemoveTrainee = async (req, res, next) => {
       day: "numeric",
     }
     const currentDate = new Date().toLocaleString("en-US", options)
-    const dateInAppointment = new Date(dayInfo).toLocaleString(
-      "en-US",
-      options
-    )
+    const dateInput = new Date(dayInfo).toLocaleString("en-US", options)
+
+    const input = new Date(dateInput)
+    const fix = input.setDate(input.getDate() + 2)
+    const fixedInput = new Date(fix).toLocaleString("en-US", options)
+    const fixedInputDate = new Date(fixedInput)
 
     const today = new Date(currentDate)
-    if (new Date(dateInAppointment) < today.setDate(today.getDate() + 2)) {
-      res.status(400).json({
-        message: "Cannot remove appointment prior to 48 hours",
-      })
-      return
+    const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
+    const todayPlusTwo = new Date(todayAddTwo)
+
+    if (process.env.NODE_ENV === "production") {
+      if (fixedInputDate < todayPlusTwo) {
+        res
+          .status(400)
+          .json({ message: "Cannot remove appointment prior to 48 hours" })
+        return
+      }
+    } else {
+      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+        res.status(400).json({
+          message: "Cannot remove appointment prior to 48 hours",
+        })
+        return
+      }
     }
 
     const { traineeId: traineeIdParams} = req.params
