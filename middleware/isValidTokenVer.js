@@ -4,7 +4,7 @@ const TokenVersion = require("../models/TokenVersion.model")
 
 exports.isValidTokenVer = async (req, res, next) => { 
   try {
-    const tokenInDB = await TokenVersion.find()
+    const tokenInDB = await TokenVersion.findOne()
     console.log('tokenInDB', tokenInDB)
     
     const tokenVersion = req.payload.version
