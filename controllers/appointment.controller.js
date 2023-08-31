@@ -36,18 +36,19 @@ const postCreateAppointment = async (req, res, next) => {
     const today = new Date(currentDate)
     const todayAddTwo = new Date(today.setDate(today.getDate() + 2))
     const todayPlusTwo = new Date(todayAddTwo)
-
-    console.log('dayInfo @ front: ', fixedInputDate)
-    console.log('constrain @ back: ', todayPlusTwo)
     
-    
-    if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
-      res
-        .status(400)
-        .json({
+    if (process.env.NODE_ENV === 'production') {
+      if (fixedInputDate < todayPlusTwo) {
+        res.status(400).json({message: "Cannot create dates before the next 48 hours",})
+        return
+      }
+    } else {
+      if (new Date(dateInput) < today.setDate(today.getDate() + 2)) {
+        res.status(400).json({
           message: "Cannot create dates before the next 48 hours",
         })
-      return
+        return
+      }
     }
 
     if (hour < 7 || hour > 22 || hour % 1 !== 0) {
