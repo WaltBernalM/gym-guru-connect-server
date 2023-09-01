@@ -31,6 +31,7 @@ exports.isAllowedTraineeOrTrainer = async (req, res, next) => {
         res
           .status(401)
           .json({ message: "Trainee credentials not found in Trainer's data" })
+        return
       }
 
       // check if traineeId is in db

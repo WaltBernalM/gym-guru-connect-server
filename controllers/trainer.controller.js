@@ -66,18 +66,55 @@ const putUpdateTrainer = async (req, res, next) => {
 
 const putAddTrainee = async (req, res, next) => { 
   try {
-    const { trainerId } = req.params
-    const { _id: traineeId } = req.payload
+    const { trainerId, traineeId } = req.params
 
-    const currentTrainer = await Trainer.findOne({ trainees: traineeId })
+    const currentTrainer = await Trainer.findOne({
+      trainees: traineeId,
+    }).populate("schedule")
 
+    let currentTrainerId
     if (currentTrainer) {
-      await Trainer.findByIdAndUpdate(
+      currentTrainerId = currentTrainer._id
+    }
+
+    if (currentTrainerId && JSON.parse(JSON.stringify(currentTrainerId)) === trainerId) {
+      res.status(400).json({ message: 'Trainee already asigned to this Trainer' })
+      return
+    }
+
+    const options = {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }
+    const currentDate = new Date().toLocaleString("en-US", options)
+    const currentTrainerSchedule = currentTrainer?.schedule.filter(
+      (appointment) => {
+        fixedTraineeId = JSON.parse(JSON.stringify(appointment.traineeId))
+        return (
+          !appointment.isAvailable &&
+          appointment.dayInfo >= currentDate &&
+          fixedTraineeId === traineeId
+        )
+      }
+    )
+    
+    if (currentTrainer && currentTrainerSchedule.length > 0) { 
+      res.status(400)
+        .json({ message: "Cannot reasign because of remaining appointments with current Trainer" })
+      return
+    }
+    
+    let previusTrainer
+    if (currentTrainer) {
+      previusTrainer = await Trainer.findByIdAndUpdate(
         currentTrainer._id,
         { $pull: { trainees: traineeId } },
-        { new: true}
+        { new: true }
       )
     }
+
     const newTrainer = await Trainer.findByIdAndUpdate(
       trainerId,
       { $push: { trainees: traineeId } },
@@ -91,7 +128,7 @@ const putAddTrainee = async (req, res, next) => {
     )
     
     if (currentTrainer) {
-      res.status(200).json({ message: `Trainee removed from previous Trainer and assigned to the new Trainer`, previousTrainer: currentTrainer, newTrainer: newTrainer })
+      res.status(200).json({ message: `Reasignment was successful`, prevTrainer: currentTrainer._id, newTrainer: newTrainer._id })
     } else {
       res.status(200).json({ message: `Trainee added to a Trainer`, newTrainer})
     }
