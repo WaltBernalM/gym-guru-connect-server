@@ -45,8 +45,6 @@ const getAllExercises = async (req, res, next) => {
       await populateExerciseDB()
     }
 
-    populateExerciseDB()
-
     const allExercises = await Exercise.find(query)
 
     res.status(200).json({ allExercises })
