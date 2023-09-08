@@ -54,7 +54,7 @@ const postNewExerciseRoutine = async (req, res, next) => {
     const clonedUpdatedTrainee = JSON.parse(JSON.stringify(updatedTrainee))
     clonedUpdatedTrainee.exercisePlan.sort((a,b) => a.day - b.day)
     
-    res.status(201).json({clonedUpdatedTrainee})
+    res.status(201).json({updatedExercisePlan: clonedUpdatedTrainee.exercisePlan})
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({error})
@@ -168,7 +168,7 @@ const deleteExerciseRoutine = async (req, res) => {
         },
       })
     
-    res.status(200).json({ updatedTrainee })
+    res.status(200).json({ updatedExercisePlan: updatedTrainee.exercisePlan })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })

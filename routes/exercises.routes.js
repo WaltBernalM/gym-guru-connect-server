@@ -1,6 +1,7 @@
 const {
   getAllExercises,
   postCustomExerciseToTraineePlan,
+  getCustomExercise,
   putUpdateCustomExercise,
   deleteCustomExerciseAndRemoveInTraineePlan,
 } = require("../controllers/exercises.controller")
@@ -16,6 +17,12 @@ router.post(
   "/:exerciseId/trainee/:traineeId",
   selfTraineeOrAllowedTrainer,
   postCustomExerciseToTraineePlan
+)
+
+router.get(
+  "/:customExerciseId/trainee/:traineeId",
+  selfTraineeOrAllowedTrainer,
+  getCustomExercise
 )
 
 router.put(

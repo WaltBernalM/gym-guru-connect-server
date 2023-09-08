@@ -129,17 +129,43 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
         },
       })
 
-    res.status(201).json({ /*newCustomExercise, updatedExerciseRoutine,*/ updatedTrainee })
+    res.status(201).json({ updatedExercisePlan: updatedTrainee.exercisePlan })
     
   } catch (error) {
     res.status(500).json({ error })
   }
 }
 
+const getCustomExercise = async (req, res, next) => {
+  try {
+    const { customExerciseId, traineeId } = req.params
+
+    const customExerciseInDB = await CustomExercise.findById(customExerciseId).populate('exerciseData')
+    if (!customExerciseInDB) {
+      return res.status(404).json({ message: 'custom exercise not found in DB' })
+    }
+
+    const exerciseRoutineInDB = await ExerciseRoutine.findOne({ exerciseList: customExerciseId })
+    if (!exerciseRoutineInDB) { 
+      return res.status(404).json({ message: 'exercise is not found in any exercise routine in DB' })
+    }
+
+    const traineeInDB = await Trainee
+      .findOne({ _id: traineeId, exercisePlan: exerciseRoutineInDB._id })
+    if (!traineeInDB) { 
+      return res.status(404).json({ message: 'exercise not found in trainee info' })
+    }
+    
+    res.status(200).json({exercise: customExerciseInDB})
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
 const putUpdateCustomExercise = async (req, res) => { 
   try {
     const { customExerciseId, traineeId } = req.params
-    const { intensity: intensityBody, reps: repsBody, exerciseId: exerciseIdBody } = req.body
+    const { series: seriesBody, intensity: intensityBody, reps: repsBody, exerciseId: exerciseIdBody } = req.body
 
     if (Object.keys(req.body).length === 0) {
       res.status(400).json({ message: 'There must be at least one parameter to update: intensity, reps or base exerciseId(exerciseData)' })
@@ -155,6 +181,7 @@ const putUpdateCustomExercise = async (req, res) => {
     const data = {
       intensity: intensityBody ? intensityBody : customExerciseInDB.intensity,
       reps: repsBody ? repsBody : customExerciseInDB.reps,
+      series: seriesBody ? seriesBody : customExerciseInDB.series,
       exerciseData: exerciseIdBody
         ? exerciseIdBody
         : customExerciseInDB.exerciseData,
@@ -193,7 +220,7 @@ const putUpdateCustomExercise = async (req, res) => {
       customExerciseId,
       { ...data },
       {new: true}
-    )
+    ).populate('exerciseData')
 
     const updatedTrainee = await Trainee.findById(traineeId)
       .select("-password")
@@ -207,7 +234,7 @@ const putUpdateCustomExercise = async (req, res) => {
         },
       })
 
-    res.status(200).json({ /*udpatedCustomExercise, */ updatedTrainee })
+    res.status(200).json({ updatedExercise: udpatedCustomExercise })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
@@ -263,7 +290,7 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
         },
       })
 
-    res.status(200).json({udpatedTrainee})
+    res.status(200).json({updatedExercisePlan: udpatedTrainee.exercisePlan})
 
     const customExerciseInTraineeData = await Trainee.find({
       _id: traineeId,
@@ -287,6 +314,7 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
 module.exports = {
   getAllExercises,
   postCustomExerciseToTraineePlan,
+  getCustomExercise,
   putUpdateCustomExercise,
   deleteCustomExerciseAndRemoveInTraineePlan,
 }
