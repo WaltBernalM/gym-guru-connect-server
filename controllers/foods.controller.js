@@ -80,10 +80,10 @@ const postFoodToTraineePortion = async (req, res) => {
       res.status(400).json({ message: "Fields that must be Number have another type" })
     }
     
-    if (!numberMinMaxOk(doubleFields, 0, 2000)) { 
-      res.status(400).json({ message: "Some double fields are surpassing the max and min limits of its value" })
-      return
-    }
+    // if (!numberMinMaxOk(doubleFields, 0, 2000)) { 
+    //   res.status(400).json({ message: "Some double fields are surpassing the max and min limits of its value" })
+    //   return
+    // }
 
     if (!isValidObjectId(portionId)) {
       res.status(404).json({ message: "portionId not valid" })
