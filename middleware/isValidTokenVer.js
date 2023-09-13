@@ -1,11 +1,13 @@
-const { getCurrentTokenVersion } = require("../controllers/config")
 const TokenVersion = require("../models/TokenVersion.model")
-
 
 exports.isValidTokenVer = async (req, res, next) => { 
   try {
-    const tokenInDB = await TokenVersion.findOne()
-
+    const tokenVersionId =
+      process.env.NODE_ENV === "production"
+        ? process.env.TOKENVERSION_ID
+        : "64efeb57ac2584d6eacadce1"
+    
+    const tokenInDB = await TokenVersion.findById(tokenVersionId)
     const tokenVersion = req.payload.version
     const currentTokenVersion = tokenInDB.version
     
@@ -14,6 +16,6 @@ exports.isValidTokenVer = async (req, res, next) => {
     }
     next()
   } catch (error) { 
-    res.status(500).json({ message: 'Intergal Server Error' })
+    res.status(500).json({ message: 'Internal Server Error' })
   }
 }
