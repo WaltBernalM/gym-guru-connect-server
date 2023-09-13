@@ -2,7 +2,6 @@ const Trainer = require('../models/Trainer.model')
 const Trainee = require('../models/Trainee.model')
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
-const { getCurrentTokenVersion, incrementTokenVersion } = require('./config')
 const TokenVersion = require('../models/TokenVersion.model')
 
 exports.postSignupController = async (req, res, next) => { 
