@@ -128,8 +128,10 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
           },
         },
       })
+    
+    const updatedExercisePlan = updatedTrainee.exercisePlan.sort((a, b) => a.day - b.day)
 
-    res.status(201).json({ updatedExercisePlan: updatedTrainee.exercisePlan })
+    res.status(201).json({ updatedExercisePlan })
     
   } catch (error) {
     res.status(500).json({ error })
