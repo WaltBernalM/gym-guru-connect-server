@@ -117,6 +117,7 @@ const getAllAppointmentsByTrainer = async (req, res, next) => {
           path: "schedule",
           populate: {
             path: "traineeId",
+            select: '-password'
           },
         })
     } else {
