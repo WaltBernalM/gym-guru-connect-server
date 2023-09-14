@@ -4,6 +4,11 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const TokenVersion = require('../models/TokenVersion.model')
 
+const tokenVersionId =
+  process.env.NODE_ENV === "production"
+    ? process.env.TOKENVERSION_ID
+    : "64efeb57ac2584d6eacadce1"
+
 exports.postSignupController = async (req, res, next) => { 
   try {
     const { firstName, lastName, password, email, isTrainer } = req.body
@@ -104,11 +109,11 @@ exports.postLoginController = async (req, res, next) => {
       }
     }
 
-    const tokenInDB = await TokenVersion.find()
-    if (tokenInDB.length === 0) {
-      await TokenVersion.create({version: 1})
-    }
-    const { version: currentTokenVersion } = await TokenVersion.findOne()
+    // const tokenInDB = await TokenVersion.find()
+    // if (tokenInDB.length === 0) {
+    //   await TokenVersion.create({version: 1})
+    // }
+    const { version: currentTokenVersion } = await TokenVersion.findById(tokenVersionId)
 
     if (trainerInDB) {
       const isPasswordCorrect = bcrypt.compareSync(password, trainerInDB.password)
@@ -184,11 +189,6 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-  const tokenVersionId =
-    process.env.NODE_ENV === "production"
-      ? process.env.TOKENVERSION_ID
-      : "64efeb57ac2584d6eacadce1"
-
   const { _id, version } = await TokenVersion.findById(tokenVersionId)
 
   let tokenVersion = version + 1
