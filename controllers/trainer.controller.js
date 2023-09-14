@@ -91,6 +91,9 @@ const putAddTrainee = async (req, res, next) => {
     const currentDate = new Date().toLocaleString("en-US", options)
     const currentTrainerSchedule = currentTrainer?.schedule.filter(
       (appointment) => {
+        console.log('dayInfo:', appointment.dayInfo)
+        console.log('currentDate:', currentDate)
+
         fixedTraineeId = JSON.parse(JSON.stringify(appointment.traineeId))
         return (
           !appointment.isAvailable &&
