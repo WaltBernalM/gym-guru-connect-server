@@ -92,11 +92,15 @@ const putAddTrainee = async (req, res, next) => {
     const currentTrainerSchedule = currentTrainer?.schedule.filter(
       (appointment) => {
         fixedTraineeId = JSON.parse(JSON.stringify(appointment.traineeId))
-        return (
-          !appointment.isAvailable &&
-          appointment.dayInfo >= currentDate &&
-          fixedTraineeId === traineeId
-        )
+        if (appointment.dayInfo >= currentDate) {
+          console.log('dayInfo:', appointment.dayInfo, 'currentDate', currentDate)
+          console.log('dayInfoDate:', new Date(appointment.dayInfo), 'currentDateDate', new Date(currentDate))
+        }
+          return (
+            !appointment.isAvailable &&
+            appointment.dayInfo >= currentDate &&
+            fixedTraineeId === traineeId
+          )
       }
     )
     
