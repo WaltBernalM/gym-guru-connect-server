@@ -92,34 +92,15 @@ const putAddTrainee = async (req, res, next) => {
     const currentTrainerSchedule = currentTrainer?.schedule.filter(
       (appointment) => {
         fixedTraineeId = JSON.parse(JSON.stringify(appointment.traineeId))
-        if (
-          !appointment.isAvailable &&
-          appointment.dayInfo >= currentDate &&
-          fixedTraineeId === traineeId
-        ) {
-          console.log(
-            "dayInfo:",
-            appointment.dayInfo,
-            "currentDate",
-            currentDate
-          )
-          console.log(
-            "dayInfoDate:",
-            new Date(appointment.dayInfo),
-            "currentDateDate",
-            new Date(currentDate)
-          )
-        }
           return (
             !appointment.isAvailable &&
-            appointment.dayInfo >= currentDate &&
+            new Date(appointment.dayInfo) >= new Date(currentDate) &&
             fixedTraineeId === traineeId
           )
       }
     )
     
     if (currentTrainer && currentTrainerSchedule.length > 0) { 
-      console.log(currentTrainerSchedule)
       res.status(400)
         .json({ message: "Cannot reasign because of remaining appointments with current Trainer" })
       return
