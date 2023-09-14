@@ -184,7 +184,12 @@ exports.getVerifyController = async (req, res, next) => {
 }
 
 exports.postLogout = async (req, res, next) => {
-  const { _id, version } = await TokenVersion.findOne()
+  const tokenVersionId =
+    process.env.NODE_ENV === "production"
+      ? process.env.TOKENVERSION_ID
+      : "64efeb57ac2584d6eacadce1"
+
+  const { _id, version } = await TokenVersion.findById(tokenVersionId)
 
   let tokenVersion = version + 1
   const updatedTokenVersion = await TokenVersion.findByIdAndUpdate(_id, { version: tokenVersion })
