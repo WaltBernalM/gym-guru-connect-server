@@ -108,14 +108,22 @@ const postCreateAppointment = async (req, res, next) => {
 const getAllAppointmentsByTrainer = async (req, res, next) => {
   try {
     const { trainerId } = req.params
-
-    const trainerInDB = await Trainer.findById(trainerId)
-      .populate({
+    const { isTrainer } = req.payload
+    let trainerInDB
+    
+    if (isTrainer) {
+      trainerInDB = await Trainer.findById(trainerId)
+        .populate({
+          path: "schedule",
+          populate: {
+            path: "traineeId",
+          },
+        })
+    } else {
+      trainerInDB = await Trainer.findById(trainerId).populate({
         path: "schedule",
-        populate: {
-          path: "traineeId",
-        },
       })
+    }
     
     const { schedule } = trainerInDB
     const sortedSchedule = schedule.sort(
