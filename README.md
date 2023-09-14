@@ -59,7 +59,7 @@ POST /signup
 
 Response:
 
-```
+```json
 201 Created 
 {
   "trainer": {
@@ -74,7 +74,7 @@ Response:
 ```
 
 if already exists:
-```
+```json
 400 Bad Request
 {
   "message": "Email already registered"
@@ -82,7 +82,7 @@ if already exists:
 ```
 
 or if no secure password:
-```
+```json
 400 Bad Request
 {
   "message": "The password is as weak as Yamcha.\n      Must have at least 6 chars, must use uppercased, \n      and lowercased letters and have at least a number"
@@ -104,7 +104,7 @@ POST /login
 
 Response:
 
-```
+```json
 200 OK
 {
   "message": "Trainer account login successfully"
@@ -114,7 +114,7 @@ Cookies:
 ```
 
 if incorrect password:
-```
+```json
 400 Bad Request
 {
   "message": "Password not valid"
@@ -123,7 +123,7 @@ if incorrect password:
 
 or mail not registered:
 
-```
+```json
 401 Unauthorized
 {
   "message": "Trainer account not found"
@@ -135,7 +135,7 @@ or mail not registered:
 Verify if user token is still valid
 
 Response:
-```
+```json
 200 OK
 {
   "_id": "64e492f7c734571e74e357a2",
@@ -152,7 +152,7 @@ Response:
 ```
 
 if authToken is invalid:
-```
+```json
 401  Unauthorized
 {
   "message": "Unauthorized: Missing authToken cookie"
@@ -162,7 +162,7 @@ if authToken is invalid:
 ### `POST /logout`
 
 Response: 
-```
+```json
 200 OK
 {
   "message": "successful logout"
@@ -170,7 +170,7 @@ Response:
 ```
 
 if missing authToken given at login:
-```
+```json
 401 Unauthorized
 {
   "message": "Unauthorized: Missing authToken cookie"
@@ -190,7 +190,7 @@ POST /exercise-routines/trainee/:traineeId
 ```
 
 Response:
-```
+```json
 {
   "updatedExercisePlan": [
     {
@@ -211,7 +211,7 @@ Get the list of all available exercises in database
 
 Response:
 
-```
+```json
 200 OK 
 "allExercises": [
   {
@@ -253,7 +253,7 @@ GET /exercises?muscle=chest&type=strength&=bench press
 ```
 
 Response:
-```
+```json
 200 OK
 {
   "allExercises": [
