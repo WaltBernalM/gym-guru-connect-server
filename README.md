@@ -264,7 +264,6 @@ Response if user is trainer:
       "traineeId": {
           "_id": "64e5949dff7dc450f391ab6b",
           "email": "wltrbm@gmail.com",
-          "password": "$2a$12$pacsqW.La5Dz/bGpsq.pcuyUYCoFhj7YAXIv47o36TJxwtEDwlyte",
           "name": {
               "firstName": "Jane",
               "lastName": "d'Arc"
