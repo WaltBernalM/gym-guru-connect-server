@@ -280,7 +280,7 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
       { $pull: { exerciseList: deletedCustomExercise._id } },
       { new: true }
     )
-    const udpatedTrainee = await Trainee.findById(traineeId)
+    const updatedTrainee = await Trainee.findById(traineeId)
       .select("-password")
       .populate({
         path: "exercisePlan",
@@ -291,19 +291,12 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
           },
         },
       })
+    
+    const updatedExercisePlan = updatedTrainee.exercisePlan.sort(
+      (a, b) => a.day - b.day
+    )
 
-    res.status(200).json({updatedExercisePlan: udpatedTrainee.exercisePlan})
-
-    const customExerciseInTraineeData = await Trainee.find({
-      _id: traineeId,
-      exercisePlan: customExerciseInRoutine._id,
-    })
-    if (!customExerciseInTraineeData) {
-      res
-        .status(404)
-        .json({ message: "Custom Exercise not found in Trainee data" })
-      return
-    }
+    res.status(200).json({updatedExercisePlan})
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
