@@ -1,4 +1,5 @@
 const { expressjwt: jwt } = require('express-jwt')
+const TokenVersion = require('../models/TokenVersion.model')
 
 const getTokenFromCookies = (req) => {
   if (req.cookies.authToken) {
