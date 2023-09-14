@@ -40,11 +40,11 @@ Create a new user (trainer or trainee)
 ```json
 POST /signup
 {
-    "email": "test@hotmail.com",
-    "password": "#Password1",
-    "firstName": "John", 
-    "lastName": "Doe",
-    "isTrainer": true
+  "email": "test@hotmail.com",
+  "password": "#Password1",
+  "firstName": "John", 
+  "lastName": "Doe",
+  "isTrainer": true
 }
 ```
 
@@ -53,14 +53,14 @@ response:
 ```
 201 Created 
 {
-    "trainer": {
-        "savedEmail": "test@hotmail.com",
-        "savedName": {
-            "firstName": "John",
-            "lastName": "Doe"
-        },
-        "trainerId": "6503666cd9cf7e6bc7ae27dd"
-    }
+  "trainer": {
+      "savedEmail": "test@hotmail.com",
+      "savedName": {
+        "firstName": "John",
+        "lastName": "Doe"
+      },
+    "trainerId": "6503666cd9cf7e6bc7ae27dd"
+  }
 }
 ```
 
@@ -68,7 +68,7 @@ if already exists:
 ```
 400 Bad Request
 {
-    "message": "Email already registered"
+  "message": "Email already registered"
 }
 ```
 
@@ -76,7 +76,7 @@ or if no secure password:
 ```
 400 Bad Request
 {
-    "message": "The password is as weak as Yamcha.\n      Must have at least 6 chars, must use uppercased, \n      and lowercased letters and have at least a number"
+  "message": "The password is as weak as Yamcha.\n      Must have at least 6 chars, must use uppercased, \n      and lowercased letters and have at least a number"
 }
 ```
 
@@ -87,9 +87,9 @@ Login to user (trainer or trainee)
 ```json
 POST /login
 {
-    "email": "email@outlook.com",
-    "password": "#Password",
-    "isTrainer": false
+  "email": "email@outlook.com",
+  "password": "#Password",
+  "isTrainer": false
 }
 ```
 
@@ -98,7 +98,7 @@ response:
 ```
 200 OK
 {
-    "message": "Trainer account login successfully"
+  "message": "Trainer account login successfully"
 }
 Cookies:
 - authToken=<YOUR_AUTH_TOKEN>; Path=/; HttpOnly; Secure; SameSite=None
@@ -108,7 +108,7 @@ if incorrect password:
 ```
 400 Bad Request
 {
-    "message": "Password not valid"
+  "message": "Password not valid"
 }
 ```
 
@@ -117,7 +117,7 @@ or mail not registered:
 ```
 401 Unauthorized
 {
-    "message": "Trainer account not found"
+  "message": "Trainer account not found"
 }
 ```
 
@@ -129,16 +129,16 @@ response:
 ```
 200 OK
 {
-    "_id": "64e492f7c734571e74e357a2",
-    "email": "waltr_7@hotmail.com",
-    "name": {
-        "lastName": "Bernal",
-        "firstName": "Walter"
-    },
-    "isTrainer": true,
-    "version": 75,
-    "iat": 1694722291,
-    "exp": 1694725891
+  "_id": "64e492f7c734571e74e357a2",
+  "email": "waltr_7@hotmail.com",
+  "name": {
+    "lastName": "Bernal",
+    "firstName": "Walter"
+  },
+  "isTrainer": true,
+  "version": 75,
+  "iat": 1694722291,
+  "exp": 1694725891
 }
 ```
 
@@ -146,7 +146,7 @@ if authToken is invalid:
 ```
 401  Unauthorized
 {
-    "message": "Unauthorized: Missing authToken cookie"
+  "message": "Unauthorized: Missing authToken cookie"
 }
 ```
 
@@ -156,7 +156,7 @@ response:
 ```
 200 OK
 {
-    "message": "successful logout"
+  "message": "successful logout"
 }
 ```
 
@@ -164,6 +164,6 @@ if missing authToken given at login:
 ```
 401 Unauthorized
 {
-    "message": "Unauthorized: Missing authToken cookie"
+  "message": "Unauthorized: Missing authToken cookie"
 }
 ```
