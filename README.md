@@ -285,7 +285,7 @@ POST /exercises/:exerciseId/trainee/:traineeId
 ```
 
 Response:
-```
+```json
 201 CREATED
 {
   "updatedExercisePlan": [
