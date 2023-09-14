@@ -316,7 +316,8 @@ const deleteAppointment = async (req, res, next) => {
       .populate({
         path: "schedule",
         populate: {
-          path: 'traineeId'
+          path: 'traineeId',
+          select: '-password'
         }
       })
     
