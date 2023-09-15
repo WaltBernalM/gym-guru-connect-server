@@ -144,7 +144,6 @@ const deleteExerciseRoutine = async (req, res) => {
     }
     
     const deletedExerciseRoutine = await ExerciseRoutine.findByIdAndDelete(exerciseRoutineId)
-    console.log('deletedExerciseRoutine: ', deletedExerciseRoutine._id)
     const { exerciseList } = deletedExerciseRoutine
     if (exerciseList.length > 0) {
       for (const customExercise of exerciseList) { 
@@ -168,7 +167,9 @@ const deleteExerciseRoutine = async (req, res) => {
         },
       })
     
-    res.status(200).json({ updatedExercisePlan: updatedTrainee.exercisePlan })
+    const updatedExercisePlan = updatedTrainee.exercisePlan.sort((a, b) => a.day - b.day)
+    
+    res.status(200).json({ updatedExercisePlan })
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
