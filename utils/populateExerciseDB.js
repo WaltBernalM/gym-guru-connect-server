@@ -37,7 +37,6 @@ const populateExerciseDB = async () => {
     for (exercise of exercisesSeeds) {
       const { name, type, muscle, equipment, instructions } = exercise
       const isCreated = await Exercise.findOne({ name })
-      console.log(exercise)
       if (!isCreated) {
         const createdExercise = await Exercise.create({
           name,
