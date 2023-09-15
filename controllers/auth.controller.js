@@ -94,7 +94,7 @@ exports.postLoginController = async (req, res, next) => {
       return
     }
 
-    let trainerInDB, traineeInDB
+    let trainerInDB, traineeInDB, userData
     if (isTrainer) {
       trainerInDB = await Trainer.findOne({ email })
       if (!trainerInDB) {
@@ -133,6 +133,12 @@ exports.postLoginController = async (req, res, next) => {
         { algorithm: "HS256", expiresIn: "1h" }
       )
       // res.status(200).json({ data: { authToken } })
+      userData = {
+        name: trainerInDB.name,
+        email: trainerInDB.email,
+        isTrainer: trainerInDB.isTrainer,
+        _id: trainerInDB._id
+      }
       res
         .cookie("authToken", authToken, {
           httpOnly: true,
@@ -142,7 +148,7 @@ exports.postLoginController = async (req, res, next) => {
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         })
-        .json({ message: "Trainer account login successfully" })
+        .json({ message: "Trainer account login successfully", userData })
     } else if (traineeInDB) {
       const isPasswordCorrect = bcrypt.compareSync(
         password,
@@ -164,6 +170,12 @@ exports.postLoginController = async (req, res, next) => {
         { algorithm: "HS256", expiresIn: "1h" }
       )
       // res.status(200).json({ data: { authToken } })
+      userData = {
+        name: traineeInDB.name,
+        email: traineeInDB.email,
+        isTrainer: traineeInDB.isTrainer,
+        _id: traineeInDB._id
+      }
       res
         .cookie("authToken", authToken, {
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -173,7 +185,7 @@ exports.postLoginController = async (req, res, next) => {
           // maxAge: 60000, // => 60,000 ms = 1 m
           maxAge: 36000000,
         })
-        .json({ message: "Trainee account login successfully" })
+        .json({ message: "Trainee account login successfully", userData })
     }
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" })
