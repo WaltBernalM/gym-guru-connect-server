@@ -99,7 +99,8 @@ POST /login
 {
   "email": "email@outlook.com",
   "password": "#Password",
-  "isTrainer": false
+  "isTrainer": false,
+  "_id": "64e492f7c734571e74e357a2"
 }
 ```
 
@@ -108,7 +109,15 @@ Response:
 ```json
 200 OK
 {
-  "message": "Trainer account login successfully"
+  "message": "Trainer account login successfully",
+  "userData": {
+    "email": "email@outlook.com",
+    "isTrainer": true,
+    "name": {
+      "firstName": "First Name",
+      "lastName": "Last Name"
+    }
+  }
 }
 Cookies:
 - authToken=<YOUR_AUTH_TOKEN>; Path=/; HttpOnly; Secure; SameSite=None
