@@ -323,3 +323,11 @@ exports.postUserLoginController = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error", error })
   }
 }
+
+exports.getUserVerifyController = async (req, res, next) => { 
+  try {
+    res.status(200).json(req.payload)
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" })
+  }
+}

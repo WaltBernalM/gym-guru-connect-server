@@ -6,9 +6,13 @@ const {
   postLogout,
   postUserSignupController,
   postUserLoginController,
+  getUserVerifyController
 } = require("../controllers/auth.controller")
 const { isValidTokenVer } = require("../middleware/isValidTokenVer")
-const { isAuthenticated } = require("../middleware/jwt.middleware")
+const {
+  isAuthenticated,
+  isUserAuthenticated,
+} = require("../middleware/jwt.middleware")
 
 router.post("/signup", postSignupController)
 
@@ -21,5 +25,5 @@ router.post('/logout', isAuthenticated, postLogout)
 // Routes for general users
 router.post('/user-signup', postUserSignupController)
 router.post('/user-login', postUserLoginController)
-
+router.get('/user-verify', isUserAuthenticated, getUserVerifyController)
 module.exports = router
