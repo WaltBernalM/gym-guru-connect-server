@@ -553,6 +553,68 @@ const patchUserCustomExercise = async (req, res) => {
   }
 }
 
+const deleteCustomExercise = async (req, res) => { 
+  try {
+    const { customExerciseId, userId } = req.params
+    const customExerciseInDB = await CustomExercise.findById(customExerciseId)
+    if (!customExerciseInDB) {
+      res.status(404).json({ message: "Custom Exercise not found in DB" })
+      return
+    }
+
+    const customExerciseInRoutine = await ExerciseRoutine.findOne({
+      exerciseList: customExerciseId,
+    })
+    if (!customExerciseInRoutine) {
+      res
+        .status(404)
+        .json({ message: "Custom Exercise not found in Exercise Routine" })
+      return
+    }
+
+    const customExerciseInUser = await User.findOne({
+      _id: userId,
+      exercisePlan: customExerciseInRoutine._id,
+    })
+    if (!customExerciseInUser) {
+      res.status(404).json({ message: "Custom Exercise not found in User" })
+      return
+    }
+
+    const deletedCustomExercise = await CustomExercise.findByIdAndDelete(
+      customExerciseId
+    )
+    const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
+      customExerciseInRoutine._id,
+      { $pull: { exerciseList: deletedCustomExercise._id } },
+      { new: true }
+    )
+    const updatedUser = await User.findById(userId)
+      .select("-password")
+      .populate({
+        path: "exercisePlan",
+        populate: {
+          path: "exerciseList",
+          populate: {
+            path: "exerciseData",
+          },
+        },
+      })
+
+    const updatedExercisePlan = updatedUser.exercisePlan.sort(
+      (a, b) => a.day - b.day
+    )
+
+    res.status(200).json({ updatedExercisePlan })
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).json({ error })
+    } else {
+      res.status(500).json({ message: "Internal Server Error" })
+    }
+  }
+}
+
 module.exports = {
   getAllExercises,
   postCustomExerciseToTraineePlan,
@@ -561,4 +623,5 @@ module.exports = {
   deleteCustomExerciseAndRemoveInTraineePlan,
   postCustomExerciseToUserPlan,
   patchUserCustomExercise,
+  deleteCustomExercise,
 }

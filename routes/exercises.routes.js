@@ -7,6 +7,7 @@ const {
   deleteCustomExerciseAndRemoveInTraineePlan,
   postCustomExerciseToUserPlan,
   patchUserCustomExercise,
+  deleteCustomExercise,
 } = require("../controllers/exercises.controller")
 const {
   selfTraineeOrAllowedTrainer,
@@ -46,4 +47,6 @@ router.delete(
 // Creates custom exercise from exercise database and adds to exercise routine of User
 router.post("/:exerciseId/user/:userId", postCustomExerciseToUserPlan)
 router.patch("/:customExerciseId/user/:userId", patchUserCustomExercise)
+router.delete('/:customExerciseId/user/:userId', deleteCustomExercise)
+
 module.exports = router
