@@ -10,6 +10,9 @@ Trainee can choose his trainer, book appointments of Trainer, and can also assig
 In order to access to the API you need to an authenticated user.
 All the Ids used must be _id from a MongoDB connection.
 
+I've added new endpoints where you can handle your own excercise plans, they follow the pattern of -user.
+This new endpoints are intended to work with Bearer tokens and local storage, so the security locks will be downgraded. Nevertheless, I suggest to use this with Mobile Applications instead of Web Applications.
+
 The application is divided in two main endpoints .
 ```
 /auth
@@ -184,6 +187,99 @@ if missing authToken given at login:
 401 Unauthorized
 {
   "message": "Unauthorized: Missing authToken cookie"
+}
+```
+
+### `POST /user-signup` -- CREATE
+
+Create a new user (this is a general purpose user account)
+
+```json
+POST /signup
+{
+  "email": "test@hotmail.com",
+  "password": "#Password1",
+  "firstName": "John", 
+  "lastName": "Doe",
+}
+```
+
+Response:
+
+```json
+201 Created 
+{
+  "user": {
+      "savedEmail": "test@hotmail.com",
+      "savedName": {
+        "firstName": "John",
+        "lastName": "Doe"
+      },
+    "uerId": "6503666cd9cf7e6bc7ae27dd"
+  }
+}
+```
+
+if already exists:
+```json
+400 Bad Request
+{
+  "message": "Email already registered"
+}
+```
+
+or if no secure password:
+```json
+400 Bad Request
+{
+  "message": "The password is as weak as Yamcha.\n      Must have at least 6 chars, must use uppercased, \n      and lowercased letters and have at least a number"
+}
+```
+
+### `POST /user-login` -- READ
+
+Login to user (general purpose user account)
+
+```json
+POST /login
+{
+  "email": "email@outlook.com",
+  "password": "#Password",
+  "_id": "64e492f7c734571e74e357a2"
+}
+```
+
+Response:
+
+```json
+200 OK
+{
+  "authToken": "<YOUR_AUTH_TOKEN>",
+  "userData": {
+    "name": {
+      "firstName": "First Name",
+      "lastName": "Last Name"
+    },
+    "email": "email@outlook.com",
+    "_id": "64e492f7c734571e74357a"
+  }
+}
+```
+
+if incorrect password:
+```json
+400 Bad Request
+{
+  "message": "Password not valid"
+}
+```
+
+or mail not registered:
+
+```json
+401 Unauthorized
+{
+  "message": "User account not found"
 }
 ```
 
