@@ -21,15 +21,6 @@ const increaseTokenVersion = async () => {
   })
 }
 
-// version 1
-// const isAuthenticated = jwt({
-//   secret: process.env.SECRET_KEY,
-//   algorithms: ["HS256"],
-//   requestProperty: "payload",
-//   getToken: getTokenFromCookies
-// })
-
-// version 2
 const isAuthenticated = (req, res, next) => {
   const token = getTokenFromCookies(req)
 
@@ -54,4 +45,18 @@ const isAuthenticated = (req, res, next) => {
   })
 }
 
-module.exports = { isAuthenticated }
+// Authentication of general user by Bearer token from headers
+const getTokenFromHeaders = (req) => {
+  if ( req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
+    return req.headers.authorization.split(" ")[1]
+  }
+  return null
+}
+const isUserAuthenticated = jwt({
+  secret: process.env.SECRET_KEY,
+  algorithms: ["HS256"],
+  requestProperty: "payload",
+  getToken: getTokenFromHeaders
+})
+
+module.exports = { isAuthenticated, isUserAuthenticated }
