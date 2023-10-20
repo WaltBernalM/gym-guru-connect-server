@@ -32,6 +32,6 @@ router.use("/foods", isAuthenticated, foodsRoutes)
 
 router.use('/users', isUserAuthenticated, userRoutes)
 router.use("/exercises-user", isUserAuthenticated, exercisesRoutes)
-router.use("/exercise-routines-user", exerciseRoutineRoutes)
+router.use("/exercise-routines-user", isUserAuthenticated, exerciseRoutineRoutes)
 
 module.exports = router

@@ -11,6 +11,7 @@ const {
 const {
   selfTraineeOrAllowedTrainer,
 } = require("../middleware/selfTraineeOrAllowedTrainer.middleware")
+const { userHimself } = require("../middleware/userHimself")
 
 // Adds a new routine to trainee, can be done by trainee or trainer
 router.post(
@@ -31,7 +32,7 @@ router.delete(
   deleteExerciseRoutine
 )
 
-router.post("/user/:userId", postNewUserRoutine)
-router.delete("/:exerciseRoutineId/user/:userId", deleteUserRoutine)
+router.post("/user/:userId", userHimself, postNewUserRoutine)
+router.delete("/:exerciseRoutineId/user/:userId", userHimself, deleteUserRoutine)
 
 module.exports = router

@@ -13,6 +13,8 @@ const {
   selfTraineeOrAllowedTrainer,
 } = require("../middleware/selfTraineeOrAllowedTrainer.middleware")
 
+const { userHimself } = require("../middleware/userHimself")
+
 const router = require("express").Router()
 
 // can accept query parameters (type and muscle). Returns base exercises
@@ -45,8 +47,8 @@ router.delete(
 )
 
 // Creates custom exercise from exercise database and adds to exercise routine of User
-router.post("/:exerciseId/user/:userId", postCustomExerciseToUserPlan)
-router.patch("/:customExerciseId/user/:userId", patchUserCustomExercise)
-router.delete('/:customExerciseId/user/:userId', deleteCustomExercise)
+router.post("/:exerciseId/user/:userId", userHimself,postCustomExerciseToUserPlan)
+router.patch("/:customExerciseId/user/:userId", userHimself, patchUserCustomExercise)
+router.delete('/:customExerciseId/user/:userId', userHimself, deleteCustomExercise)
 
 module.exports = router
