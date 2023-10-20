@@ -292,7 +292,7 @@ exports.postUserLoginController = async (req, res, next) => {
 
     let userInDB = await User.findOne({ email })
     if (!userInDB) {
-      res.status(401).json({ message: "Trainer account not found" })
+      res.status(401).json({ message: "User account not found" })
       return
     }
 
