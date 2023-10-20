@@ -236,7 +236,7 @@ or if no secure password:
 }
 ```
 
-### `POST /user-login` -- READ
+### `POST /user-login` -- CREATE
 
 Login to user (general purpose user account)
 
@@ -280,6 +280,25 @@ or mail not registered:
 401 Unauthorized
 {
   "message": "User account not found"
+}
+```
+
+### `GET /user-verify` -- READ
+
+Verify if user token is still valid
+
+Response:
+```json
+200 OK
+{
+  "_id": "64e492f7c734571e74e357a2",
+  "email": "waltr_7@hotmail.com",
+  "name": {
+    "lastName": "Bernal",
+    "firstName": "Walter"
+  },
+  "iat": 1694722291,
+  "exp": 1694725891
 }
 ```
 
@@ -630,6 +649,97 @@ Response:
         }, ...
       ]
     }
+  ]
+}
+```
+
+### `GET /users/:userId` -- READ
+Read all information of general User account. Middleware validation is performed to avoid users accessing to information of other users.
+
+#### Request
+- **Authorization Header**: Include an `Authorization` header with a valid authToken (provided at login) to authenticate the request.
+
+Response:
+```json
+200 OK
+{
+  "_id": "johndoeId",
+  "email": "johndoe@gmail.com",
+  "name": {
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "personalInfo": {
+    "age": 0,
+    "height": null,
+    "weight": null,
+    "fatPercent": null,
+    "goal": "",
+    "comments": ""
+  },
+  "exercisePlan": [
+    { ... },
+    { ... },
+    ...
+  ],
+  "nutritionPlan": [
+    { ... },
+    { ... },
+    ...
+  ],
+  "createdAt": "2023-10-20T12:10:09.863Z",
+  "updatedAt": "2023-10-20T12:14:13.320Z",
+}
+```
+
+### `POST /exercise-routines-user/user/:userId` -- CREATE
+Creates a new exercise routine for the given general user account, you can only create up to 6 days. Middleware validation is performed to avoid users accessing to information of other users.
+
+#### Request
+- **Authorization Header**: Include an `Authorization` header with a valid authToken (provided at login) to authenticate the request.
+```json
+POST /exercise-routines-user/user/:userId
+{
+  "day": 4
+}
+```
+
+#### Response
+```json
+201 Created
+{
+  "updatedExercisePlan": [
+    {
+			"_id": "6532713437f870e74f1353f6",
+			"day": 4,
+			"exerciseList": [],
+			"createdAt": "2023-10-20T12:23:16.586Z",
+			"updatedAt": "2023-10-20T12:23:16.586Z",
+			"__v": 0
+		}, ...
+  ]
+}
+```
+
+### `DELETE /exercise-routines-user/:exerciseRoutineId/user/:userId` -- DELETE
+Deletes a given exercise routine, including all exercises within it. Middleware validation is performed to avoid users accessing to information of other users.
+
+#### Request
+- **Authorization Header**: Include an `Authorization` header with a valid authToken (provided at login) to authenticate the request.
+
+#### Response
+```json
+201 Created
+{
+  "updatedExercisePlan": [
+    {
+			"_id": "6532713437f870e74f1353f6",
+			"day": 4,
+			"exerciseList": [],
+			"createdAt": "2023-10-20T12:23:16.586Z",
+			"updatedAt": "2023-10-20T12:23:16.586Z",
+			"__v": 0
+		}, ...
   ]
 }
 ```
