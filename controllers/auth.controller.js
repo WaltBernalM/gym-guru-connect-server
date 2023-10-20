@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const TokenVersion = require('../models/TokenVersion.model')
 
+const User = require('../models/User.model')
+
 const tokenVersionId =
   process.env.NODE_ENV === "production"
     ? process.env.TOKENVERSION_ID
@@ -211,4 +213,113 @@ exports.postLogout = async (req, res, next) => {
     expires: new Date(0),
   })
   res.status(200).json({ message: "successful logout" })
+}
+
+exports.postUserSignupController = async (req, res, next) => { 
+  try {
+    const { firstName, lastName, password, email } = req.body
+
+    if (!email || !password || !firstName || !lastName) {
+      res
+        .status(400)
+        .json({ message: "All fields required (name, password, email)" })
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ message: "Email format invalid" })
+      return
+    }
+
+    const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/
+    if (!passwordRegex.test(password)) {
+      res.status(400).json({
+        message: `The password is as weak as Yamcha.
+    Must have at least 6 chars, must use uppercased, 
+    and lowercased letters and have at least a number`,
+      })
+      return
+    }
+
+    if (
+      !String(email).endsWith("hotmail.com") &&
+      !String(email).endsWith("gmail.com") &&
+      !String(email).endsWith("outlook.com")
+    ) {
+      res
+        .status(400)
+        .json({
+          message: `We are limited to accept emails from Gmail, Outlook or Hotmail ${email}`,
+        })
+      return
+    }
+
+    // Check if the email is already taken by another user
+    const userFound = await User.findOne({ email })
+    if (userFound) {
+      res.status(400).json({ message: "Email already registered" })
+      return
+    }
+
+    const salt = bcrypt.genSaltSync(12)
+    const hashPassword = bcrypt.hashSync(password, salt)
+
+    const createdUser = await User.create({
+      email,
+      name: { firstName, lastName },
+      password: hashPassword,
+    })
+    const {
+      email: savedEmail,
+      name: savedName,
+      _id: userId,
+    } = createdUser
+    res.status(201).json({ user: { savedEmail, savedName, userId } })
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error", error })
+  }
+}
+
+exports.postUserLoginController = async (req, res, next) => {
+  try {
+    const { password, email } = req.body
+
+    if (!email || !password) {
+      res.status(400).json({ message: "all fields required (password & email)" })
+      return
+    }
+
+    let userInDB = await User.findOne({ email })
+    if (!userInDB) {
+      res.status(401).json({ message: "Trainer account not found" })
+      return
+    }
+
+    // Verification of password
+    const isPasswordCorrect = bcrypt.compareSync(
+      password,
+      userInDB.password
+    )
+    if (!isPasswordCorrect) {
+      res.status(400).json({ message: "Password not valid" })
+      return
+    }
+
+    const authToken = jwt.sign(
+      { _id: userInDB._id, email: userInDB.email, name: userInDB.name, }, // payload
+      process.env.SECRET_KEY, // secret key
+      { algorithm: "HS256", expiresIn: "1h" }
+    )
+
+    let userData = {
+      name: userInDB.name,
+      email: userInDB.email,
+      _id: userInDB._id,
+    }
+    
+    res.status(200).json({ authToken, userData })
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error", error })
+  }
 }
