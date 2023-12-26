@@ -1,7 +1,9 @@
 const router = require("express").Router()
 
-const { getWellKnownJson } = require("../controllers/well.known.controller")
+const { getWellKnownJson, getDidConfiguration } = require("../controllers/well.known.controller")
 
-router.get("/", getWellKnownJson )
+router.get("/did.json", getWellKnownJson)
+
+router.get("/did-configuration.json", getDidConfiguration)
 
 module.exports = router

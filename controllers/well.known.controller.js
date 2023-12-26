@@ -41,8 +41,16 @@ const getWellKnownJson = async (req, res, next) => {
     authentication: [process.env.DID_DOCUMENT_AUTHENTICATION],
     assertionMethod: [process.env.DID_DOCUMENT_ASSERTION_METHOD],
   }
-
   res.status(200).json(didDocument)
 }
 
-module.exports = { getWellKnownJson }
+const getDidConfiguration = async (req, res, next) => { 
+  const manifest = {
+    "@context": process.env.DID_MANIFEST_CONTEXT,
+    linked_dids: [process.env.DID_MANIFEST_LINKED],
+  }
+
+  res.status(200).json(manifest)
+}
+
+module.exports = { getWellKnownJson, getDidConfiguration }
