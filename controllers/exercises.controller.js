@@ -4,10 +4,12 @@ const CustomExercise = require("../models/CustomExercise.model")
 const Exercise = require("../models/Exercise.model")
 const ExerciseRoutine = require("../models/ExerciseRoutine.model")
 const Trainee = require("../models/Trainee.model")
+const SetType = require("../models/SetType.model")
 const mongoose = require("mongoose")
 const { populateExerciseDB } = require("../utils/populateExerciseDB")
 
 const User = require("../models/User.model")
+const { MessageConstants } = require("../utils/MessageConstants")
 
 const getAllExercises = async (req, res, next) => {
   try {
@@ -67,7 +69,7 @@ const getAllExercises = async (req, res, next) => {
 
 const postCustomExerciseToTraineePlan = async (req, res, next) => {
   try {
-    const { reps, intensity, exerciseRoutineId, series } = req.body
+    const { reps, intensity, exerciseRoutineId, series, setTypeId } = req.body
     const { exerciseId, traineeId } = req.params
     if (!reps || !intensity || !exerciseRoutineId || !series) {
       res.status(400).json({ message: "series, reps, intensity are required" })
@@ -105,6 +107,15 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
       return
     }
 
+    // Verifies if the setType passed is in database
+    if (setTypeId !== null) {
+      const setTypeInDB = await SetType.findById(setTypeId)
+      if (!setTypeInDB) {
+        res.status(404).json({ message: "setTypeId not found in DB" })
+        return
+      }
+    }
+
     // Verifies if routine to update is in trainee
     const routineInTrainee = await Trainee.findOne({
       exercisePlan: exerciseRoutineInDB._id,
@@ -117,14 +128,15 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
     }
 
     // Creates a new custom exercise
-    const newCustomExercise = await (
-      await CustomExercise.create({
-        reps,
-        series,
-        intensity,
-        exerciseData: exerciseId,
-      })
-    ).populate("exerciseData")
+    const newCustomExercise = await (await CustomExercise.create({
+      reps,
+      series,
+      intensity,
+      exerciseData: exerciseId,
+      setType: setTypeId
+    }))
+      .populate("exerciseData")
+      .populate("setType")
 
     // adds the new custom exercise to the routine of the trainee
     const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
@@ -139,10 +151,11 @@ const postCustomExerciseToTraineePlan = async (req, res, next) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: 'setType' }
+          ]
+        }
       })
 
     const updatedExercisePlan = updatedTrainee.exercisePlan.sort(
@@ -162,6 +175,8 @@ const getCustomExercise = async (req, res, next) => {
     const customExerciseInDB = await CustomExercise.findById(
       customExerciseId
     ).populate("exerciseData")
+    .populate("setType")
+
     if (!customExerciseInDB) {
       return res
         .status(404)
@@ -203,6 +218,7 @@ const putUpdateCustomExercise = async (req, res) => {
       intensity: intensityBody,
       reps: repsBody,
       exerciseId: exerciseIdBody,
+      setTypeId
     } = req.body
 
     if (Object.keys(req.body).length === 0) {
@@ -231,19 +247,17 @@ const putUpdateCustomExercise = async (req, res) => {
     }
 
     if (data.reps < 1 || data.reps > 300 || data.reps % 1 !== 0) {
-      res.status(400).json({
-        message: "reps must be a integer number between 1 and 300",
-      })
+      res.status(400).json({ message: MessageConstants.EXERCISE_REPS_RANGE_ERROR })
       return
     }
     if (data.intensity < 0.3 || data.intensity > 1) {
-      res.status(400).json({ message: "intensity must be between 0.3 and 1" })
+      res.status(400).json({ message: MessageConstants.EXERCISE_INTENSITY_RANGE_ERROR })
       return
     }
 
     const validExercise = await Exercise.findById(data.exerciseData)
     if (!validExercise) {
-      res.status(404).json({ message: "Base exercise not found in DB" })
+      res.status(404).json({ message: MessageConstants.BASE_EXERCISE_NOT_FOUND_ERROR })
       return
     }
 
@@ -251,33 +265,31 @@ const putUpdateCustomExercise = async (req, res) => {
       exerciseList: customExerciseId,
     })
     if (!customExerciseInRoutine) {
-      res
-        .status(404)
-        .json({
-          message: "Custom Exercise not found in any Exercise Routine in DB",
-        })
+      res.status(404).json({ message: MessageConstants.CUSTOM_EXERCISE_NOT_FOUND_IN_TRAINEE_ERROR })
       return
     }
 
-    const routineInTrainee = await Trainee.find({
-      _id: traineeId,
-      exercisePlan: customExerciseInRoutine._id,
-    })
+    const routineInTrainee = await Trainee.find({ _id: traineeId, exercisePlan: customExerciseInRoutine._id })
     if (!routineInTrainee) {
-      res
-        .status(404)
-        .json({
-          message:
-            "Custom Exercise not found in any Exercise Routine of Trainee",
-        })
+      res.status(404).json({ message: MessageConstants.CUSTOM_EXERCISE_NOT_FOUND_IN_TRAINEE_ERROR })
       return
+    }
+
+    if (setTypeId !== null) {
+      const setTypeInDB = SetType.findById(setTypeId)
+      if (!setTypeInDB) {
+        res.status(404).json({ message: MessageConstants.SET_TYPE_NOT_FOUND_IN_DB })
+        return
+      }
     }
 
     const udpatedCustomExercise = await CustomExercise.findByIdAndUpdate(
       customExerciseId,
       { ...data },
       { new: true }
-    ).populate("exerciseData")
+    )
+      .populate("exerciseData")
+      .populate("setType")
 
     const updatedTrainee = await Trainee.findById(traineeId)
       .select("-password")
@@ -285,10 +297,11 @@ const putUpdateCustomExercise = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     res.status(200).json({ updatedExercise: udpatedCustomExercise })
@@ -296,7 +309,7 @@ const putUpdateCustomExercise = async (req, res) => {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).json({ error })
     } else {
-      res.status(500).json({ message: "Internal Server Error" })
+      res.status(500).json({ message: MessageConstants.INTERNAL_SERVER_ERROR })
     }
   }
 }
@@ -314,8 +327,7 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
       exerciseList: customExerciseId,
     })
     if (!customExerciseInRoutine) {
-      res
-        .status(404)
+      res.status(404)
         .json({ message: "Custom Exercise not found in Exercise Routine" })
       return
     }
@@ -343,10 +355,11 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     const updatedExercisePlan = updatedTrainee.exercisePlan.sort(
@@ -365,15 +378,14 @@ const deleteCustomExerciseAndRemoveInTraineePlan = async (req, res, next) => {
 
 const postCustomExerciseToUserPlan = async (req, res, next) => {
   try {
-    const { reps, intensity, exerciseRoutineId, series } = req.body
+    const { reps, intensity, exerciseRoutineId, series, setTypeId } = req.body
     const { exerciseId, userId } = req.params
     if (!reps || !intensity || !exerciseRoutineId || !series) {
       res.status(400).json({ message: "series, reps, intensity are required" })
       return
     }
     if (series < 1 || series > 20 || series % 1 !== 0) {
-      res
-        .status(400)
+      res.status(400)
         .json({ message: "reps must be a integer number between 1 and 20" })
     }
     if (reps < 1 || (reps > 300 && reps % 1 !== 0)) {
@@ -403,14 +415,21 @@ const postCustomExerciseToUserPlan = async (req, res, next) => {
       return
     }
 
+    // Verifies if the set type is in database
+    if (setTypeId) {
+      const setTypeInDB = await SetType.findById(setTypeId)
+      if (!setTypeInDB) {
+        res.status(404).json({ message: MessageConstants.SET_TYPE_NOT_FOUND_IN_DB_ERROR })
+        return
+      }
+    }
+
     // Verifies if routine to update is in User
     const routineInUser = await User.findOne({
       exercisePlan: exerciseRoutineInDB._id,
     })
     if (!routineInUser) {
-      res
-        .status(404)
-        .json({ message: "exerciseRoutineId not found in Trainee data" })
+      res.status(404).json({ message: "exerciseRoutineId not found in Trainee data" })
       return
     }
 
@@ -421,8 +440,11 @@ const postCustomExerciseToUserPlan = async (req, res, next) => {
         series,
         intensity,
         exerciseData: exerciseId,
+        setType: setTypeId
       })
-    ).populate("exerciseData")
+    )
+      .populate("exerciseData")
+      .populate("setType")
 
     // adds the new custom exercise to the routine of the user
     const updatedExerciseRoutine = await ExerciseRoutine.findByIdAndUpdate(
@@ -437,10 +459,11 @@ const postCustomExerciseToUserPlan = async (req, res, next) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     // Sorts the exercise plan
@@ -462,6 +485,7 @@ const patchUserCustomExercise = async (req, res) => {
       intensity: intensityBody,
       reps: repsBody,
       exerciseId: exerciseIdBody,
+      setTypeId
     } = req.body
 
     if (Object.keys(req.body).length === 0) {
@@ -476,6 +500,14 @@ const patchUserCustomExercise = async (req, res) => {
     if (!customExerciseInDB) {
       res.status(404).json({ message: "Custom Exercise not found in DB" })
       return
+    }
+
+    if (setTypeId) {
+      const setTypeInDB = SetType.findById(setTypeId)
+      if (!setTypeInDB) {
+        res.status(400).json({ message: MessageConstants.SET_TYPE_NOT_FOUND_IN_DB_ERROR })
+        return
+      }
     }
 
     const data = {
@@ -529,7 +561,9 @@ const patchUserCustomExercise = async (req, res) => {
       customExerciseId,
       { ...data },
       { new: true }
-    ).populate("exerciseData")
+    )
+      .populate("exerciseData")
+      .populate("setType")
 
     const updatedUser = await User.findById(userId)
       .select("-password")
@@ -537,10 +571,11 @@ const patchUserCustomExercise = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     res.status(200).json({ updatedExercise: udpatedCustomExercise })
@@ -595,15 +630,15 @@ const deleteCustomExercise = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
-    const updatedExercisePlan = updatedUser.exercisePlan.sort(
-      (a, b) => a.day - b.day
-    )
+    const updatedExercisePlan = updatedUser.exercisePlan
+      .sort((a, b) => a.day - b.day)
 
     res.status(200).json({ updatedExercisePlan })
   } catch (error) {

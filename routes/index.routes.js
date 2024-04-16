@@ -15,6 +15,8 @@ const foodsRoutes = require("../routes/foods.routes.js")
 
 const userRoutes = require('../routes/user.routes')
 
+const setTypeRoutes = require("../routes/setType.routes")
+
 router.get("/", (req, res, next) => {
   res.status(200).json({ message: "Welcome to Gym-Guru-Connect API" })
 })
@@ -33,5 +35,7 @@ router.use("/foods", isAuthenticated, foodsRoutes)
 router.use('/users', isUserAuthenticated, userRoutes)
 router.use("/exercises-user", isUserAuthenticated, exercisesRoutes)
 router.use("/exercise-routines-user", isUserAuthenticated, exerciseRoutineRoutes)
+
+router.use('/set-types', isAuthenticated, setTypeRoutes)
 
 module.exports = router

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Warmp-up",
+    "description": "Are intended to prepare the body for heavier weight loads.",
+    "keycode": "W"
+  },
+  {
+    "name": "Drop-set",
+    "description": "Are sets in which the weight is lowered ('dropped') in order to perform additional reps at lower weight.",
+    "keycode": "D"
+  },
+  {
+    "name": "Failure",
+    "description": "Are sets intended to keep counting the reps until the weigth can no longer be lifter.",
+    "keycode": "F"
+  }
+]

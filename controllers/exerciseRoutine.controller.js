@@ -2,9 +2,7 @@
 
 const ExerciseRoutine = require("../models/ExerciseRoutine.model")
 const CustomExercise = require("../models/CustomExercise.model")
-const Exercise = require("../models/Exercise.model")
 const Trainee = require("../models/Trainee.model")
-const Trainer = require("../models/Trainer.model")
 const mongoose = require("mongoose")
 
 const User = require('../models/User.model')
@@ -54,10 +52,11 @@ const postNewExerciseRoutine = async (req, res, next) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     const clonedUpdatedTrainee = JSON.parse(JSON.stringify(updatedTrainee))
@@ -122,10 +121,11 @@ const putUpdateExerciseRoutine = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     res.status(200).json({ updatedTrainee })
@@ -179,10 +179,11 @@ const deleteExerciseRoutine = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     const updatedExercisePlan = updatedTrainee.exercisePlan.sort(
@@ -244,10 +245,11 @@ const postNewUserRoutine = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     const updatedExercisePlan = updatedUser.exercisePlan.sort((a, b) => a.day - b.day)
@@ -303,10 +305,11 @@ const deleteUserRoutine = async (req, res) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
 
     const updatedExercisePlan = updatedUser.exercisePlan.sort(

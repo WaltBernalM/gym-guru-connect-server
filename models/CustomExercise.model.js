@@ -20,6 +20,10 @@ const customExercise = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Exercise",
     },
+    setType: {
+      type: Schema.Types.ObjectId,
+      ref: "SetType"
+    }
   },
   { timestamps: true }
 )

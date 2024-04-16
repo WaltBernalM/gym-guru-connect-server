@@ -11,10 +11,11 @@ const getUser = async (req, res, next) => {
         path: "exercisePlan",
         populate: {
           path: "exerciseList",
-          populate: {
-            path: "exerciseData",
-          },
-        },
+          populate: [
+            { path: "exerciseData" },
+            { path: "setType" }
+          ]
+        }
       })
       .populate({
         path: "nutritionPlan",
